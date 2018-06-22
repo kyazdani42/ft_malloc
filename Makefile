@@ -31,7 +31,7 @@ makelib:
 	@make -C $(LIB)
 
 clean:
-	@rm $(NAME)
+	@rm -f $(NAME)
 	@echo "Library deleted"
 
 fclean: clean
