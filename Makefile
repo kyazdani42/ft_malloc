@@ -35,6 +35,6 @@ clean:
 	@echo "Library deleted"
 
 fclean: clean
-	@make clean -C $(LIB)
+	@make fclean -C $(LIB)
 
 re: fclean all
