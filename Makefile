@@ -4,37 +4,31 @@ endif
 NAME = libft_malloc_$(HOSTTYPE).so
 CC = gcc
 
-INC = includes/ libft/includes/
-PREP_INCS = -Iincludes/ -Ilibft/includes/
-
-LIB = libft/
-LIBFT_STATIC = libft/libft.a
+INC = includes/
+PREP_INCS = -Iincludes/
 
 SRC = malloc.c \
 	  free.c \
 	  realloc.c
-PATH_SRC = srcs
-SRCS = $(addprefix $(PATH_SRC)/, $(SRC))
+
+PATH_SRC = ./src/
+SRCS = $(addprefix $(PATH_SRC), $(SRC))
 
 FLAGS = -Wall -Werror -Wextra -fPIC -pedantic
 FLAGS_SO = -shared -o
 
-.PHONY: all makelib clean fclean re
+.PHONY: all clean fclean re
 
-all: makelib $(NAME)
+all: $(NAME)
 
 $(NAME): $(INC)
-	@$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) $(LIBFT_STATIC) $(FLAGS_SO) $@
+	$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) $(FLAGS_SO) $@
 	@echo "Library $@ created"
-
-makelib:
-	@make -C $(LIB)
 
 clean:
 	@rm -f $(NAME)
 	@echo "Library deleted"
 
 fclean: clean
-	@make fclean -C $(LIB)
 
 re: fclean all
