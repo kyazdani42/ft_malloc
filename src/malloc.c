@@ -6,7 +6,7 @@
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/02 16:42:46 by kyazdani          #+#    #+#             */
-/*   Updated: 2018/06/22 14:20:50 by kyazdani         ###   ########.fr       */
+/*   Updated: 2019/04/22 18:06:15 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	*malloc(size_t size)
 {
-	(void)size;
-	ft_putstr("jeeeeez");
+	if (!size)
+		return (NULL);
 	return (NULL);
 }
