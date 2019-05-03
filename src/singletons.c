@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   malloc.h                                           :+:      :+:    :+:   */
+/*   singletons.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,39 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MALLOC_H
-# define MALLOC_H
+#include "../includes/ft_malloc.h"
 
-# include <sys/types.h>
-# include <sys/mman.h>
-# include <sys/resource.h>
-# include <sys/time.h>
-# include <unistd.h>
-
-# define TINY 100
-# define SMALL 600
-# define BIG 1000
-
-typedef struct		s_alloc
+t_blob	*get_allocations(void *blob)
 {
-	void			*addr;
-	size_t			len;
-	struct s_alloc	*next;
-}					t_alloc;
+	static t_blob *g_blob = NULL;
 
-typedef struct		s_blob
-{
-	size_t			total_space;
-	size_t			current_taken_space;
-	t_alloc			*allocations;
-	struct s_blob	*next;
-}					t_blob;
-
-t_blob				*g_blob_list = NULL;
-
-void				free(void *ptr);
-void				*malloc(size_t size);
-void				*realloc(void *ptr, size_t size);
-void				*alloc_handler();
-
-#endif
+	if (blob != NULL)
+		g_blob = blob;
+	return (g_blob);
+}

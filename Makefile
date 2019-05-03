@@ -23,6 +23,7 @@ all: $(NAME)
 
 $(NAME): $(INC)
 	$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) $(FLAGS_SO) $@
+	# some ln things to do here
 	@echo "Library $@ created"
 
 clean:

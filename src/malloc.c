@@ -10,11 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "malloc.h"
+#include "../includes/ft_malloc.h"
 
 void	*malloc(size_t size)
 {
+	int	allocation_length;
+
 	if (!size)
 		return (NULL);
+	allocation_length = get_alloc_length(size);
+
 	return (NULL);
 }

@@ -10,29 +10,53 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/malloc.h"
+#include "../includes/ft_malloc.h"
 
-static size_t	get_alloc_length(size_t *len)
+size_t	get_alloc_length(size_t len)
 {
-	if (*len < TINY)
-		return (TINY);
-	else if (*len < SMALL)
-		return (SMALL);
-	else if (*len < BIG)
-		return (BIG);
-	else
-		return (*len);
+	int page_size;
+	int tiny;
+	int small;
+	int large;
+
+	page_size = getpagesize();
+	tiny = TINY(page_size);
+	small = SMALL(page_size);
+	large = LARGE(page_size);
+	if (len < tiny)
+		return (tiny);
+	if (len < small)
+		return (small);
+	if (len < large)
+		return (large);
+	return (len);
 }
 
-void			*alloc_handler(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
+static void		*allocate(void *addr, size_t len)
+{
+	void		*mmap_ret;
+
+	mmap_ret = mmap(addr, len, PROT_READ | PROT_WRITE,
+					MAP_ANON | MAP_PRIVATE, -1, 0);
+	return (mmap_ret);
+}
+
+void			*alloc_handler(void *addr, size_t len)
 {
 	size_t		total_allocation_length;
 	void		*mmap_ret;
+	t_blob		*allocations;
 
-	total_allocation_length = get_alloc_length(&len);
-	if (g_blob_list == NULL)
-		mmap_ret = mmap(addr, total_allocation_length, prot, flags, fd, offset);
+	total_allocation_length = get_alloc_length(len);
+	allocations = get_allocations((void*)NULL);
+	if (allocations == NULL)
+	{
+		mmap_ret = allocate(addr, len);
+		get_allocations(mmap_ret);
+		return (mmap_ret);
+	}
 	else
-		return (NULL);
-	return (mmap_ret);
+	{
+		return ((void*)NULL);
+	}
 }
