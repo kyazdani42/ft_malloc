@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   allocator.c                                        :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,31 +12,22 @@
 
 #include "../includes/ft_malloc.h"
 
-static void		*allocate(void *addr, size_t len)
+size_t	get_alloc_length(size_t len)
 {
-	void		*mmap_ret;
+	int page_size;
+	int tiny;
+	int small;
+	int large;
 
-	mmap_ret = mmap(addr, len, PROT_READ | PROT_WRITE,
-					MAP_ANON | MAP_PRIVATE, -1, 0);
-	return (mmap_ret);
-}
-
-void			*alloc_handler(void *addr, size_t len)
-{
-	size_t		total_allocation_length;
-	void		*mmap_ret;
-	t_blob		*allocations;
-
-	total_allocation_length = get_alloc_length(len);
-	allocations = get_allocations((void*)NULL);
-	if (allocations == NULL)
-	{
-		mmap_ret = allocate(addr, len);
-		get_allocations(mmap_ret);
-		return (mmap_ret);
-	}
-	else
-	{
-		return ((void*)NULL);
-	}
+	page_size = getpagesize();
+	tiny = TINY(page_size);
+	small = SMALL(page_size);
+	large = LARGE(page_size);
+	if (len < tiny)
+		return (tiny);
+	if (len < small)
+		return (small);
+	if (len < large)
+		return (large);
+	return (len);
 }
