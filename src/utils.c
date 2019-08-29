@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/ft_malloc.h"
+#include "ft_malloc.h"
 
 size_t	get_alloc_length(size_t len)
 {
@@ -19,7 +19,8 @@ size_t	get_alloc_length(size_t len)
 	int small;
 	int large;
 
-	page_size = getpagesize();
+	/* page_size = getpagesize(); */
+	page_size = sysconf(_SC_PAGESIZE);
 	tiny = TINY(page_size);
 	small = SMALL(page_size);
 	large = LARGE(page_size);

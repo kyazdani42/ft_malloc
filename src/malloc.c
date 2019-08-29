@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/ft_malloc.h"
+#include "ft_malloc.h"
 
 void	*malloc(size_t size)
 {

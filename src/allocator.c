@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/ft_malloc.h"
+#include "ft_malloc.h"
 
 static void		*allocate(void *addr, size_t len)
 {
