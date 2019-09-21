@@ -14,29 +14,29 @@
 
 static void		*allocate(void *addr, size_t len)
 {
-	void		*mmap_ret;
+    void		*mmap_ret;
 
-	mmap_ret = mmap(addr, len, PROT_READ | PROT_WRITE,
-					MAP_ANON | MAP_PRIVATE, -1, 0);
-	return (mmap_ret);
+    mmap_ret = mmap(addr, len, PROT_READ | PROT_WRITE,
+            MAP_ANON | MAP_PRIVATE, -1, 0);
+    return (mmap_ret);
 }
 
 void			*alloc_handler(void *addr, size_t len)
 {
-	size_t		total_allocation_length;
-	void		*mmap_ret;
-	t_blob		*allocations;
+    size_t		total_allocation_length;
+    void		*mmap_ret;
+    t_blob		*allocations;
 
-	total_allocation_length = get_alloc_length(len);
-	allocations = get_allocations((void*)NULL);
-	if (allocations == NULL)
-	{
-		mmap_ret = allocate(addr, len);
-		get_allocations(mmap_ret);
-		return (mmap_ret);
-	}
-	else
-	{
-		return ((void*)NULL);
-	}
+    total_allocation_length = get_alloc_length(len);
+    allocations = get_allocations((void*)NULL);
+    if (allocations == NULL)
+    {
+        mmap_ret = allocate(addr, len);
+        get_allocations(mmap_ret);
+        return (mmap_ret);
+    }
+    else
+    {
+        return ((void*)NULL);
+    }
 }

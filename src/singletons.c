@@ -14,9 +14,9 @@
 
 t_blob	*get_allocations(void *blob)
 {
-	static t_blob *g_blob = NULL;
+    static t_blob *g_blob = NULL;
 
-	if (blob != NULL)
-		g_blob = blob;
-	return (g_blob);
+    if (blob != NULL)
+        g_blob = blob;
+    return (g_blob);
 }

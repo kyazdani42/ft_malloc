@@ -24,23 +24,23 @@
 # define LARGE(x) x * 200
 
 enum	e_size {
-	TINY,
-	SMALL,
-	LARGE
+    TINY,
+    SMALL,
+    LARGE
 };
 
 typedef struct		s_alloc
 {
-	void			*addr;
-	size_t			len;
-	struct s_alloc	*next;
+    void			*addr;
+    size_t			len;
+    struct s_alloc	*next;
 }					t_alloc;
 
 typedef struct		s_blob
 {
-	size_t			size;
-	t_alloc			*allocations;
-	struct s_blob	*next;
+    size_t			size;
+    t_alloc			*allocations;
+    struct s_blob	*next;
 }					t_blob;
 
 void				free(void *ptr);

@@ -14,11 +14,11 @@
 
 void	*malloc(size_t size)
 {
-	int	allocation_length;
+    int	allocation_length;
 
-	if (!size)
-		return (NULL);
-	allocation_length = get_alloc_length(size);
+    if (!size)
+        return (NULL);
+    allocation_length = get_alloc_length(size);
 
-	return (NULL);
+    return (NULL);
 }

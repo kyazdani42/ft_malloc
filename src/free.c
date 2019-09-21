@@ -12,8 +12,8 @@
 
 #include "ft_malloc.h"
 
-void	free(void *ptr)
+void free(void *ptr)
 {
-	(void)ptr;
-	write(1, "X", 1);
+    (void)ptr;
+    write(1, "X", 1);
 }
