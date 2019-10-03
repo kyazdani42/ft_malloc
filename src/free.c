@@ -6,13 +6,13 @@
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/02 16:42:41 by kyazdani          #+#    #+#             */
-/*   Updated: 2018/06/22 14:06:53 by kyazdani         ###   ########.fr       */
+/*   Updated: 2019/10/03 19:27:00 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-void free(void *ptr)
+void ft_free(void *ptr)
 {
     (void)ptr;
     write(1, "X", 1);

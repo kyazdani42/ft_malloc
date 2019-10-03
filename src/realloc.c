@@ -6,13 +6,13 @@
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/02 16:42:55 by kyazdani          #+#    #+#             */
-/*   Updated: 2018/06/22 14:07:10 by kyazdani         ###   ########.fr       */
+/*   Updated: 2019/10/03 19:26:57 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-void	*realloc(void *ptr, size_t size)
+void	*ft_realloc(void *ptr, size_t size)
 {
     (void)ptr;
     (void)size;

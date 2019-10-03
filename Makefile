@@ -5,7 +5,7 @@ NAME = libft_malloc_$(HOSTTYPE).so
 CC = gcc
 
 INC = includes/
-PREP_INCS = -Iincludes/
+PREP_INCS = -I$(INC)
 
 SRC = malloc.c \
 	  free.c \
@@ -14,8 +14,8 @@ SRC = malloc.c \
 PATH_SRC = ./src/
 SRCS = $(addprefix $(PATH_SRC), $(SRC))
 
-FLAGS = -Wall -Werror -Wextra -fPIC -pedantic
-FLAGS_SO = -shared -o
+FLAGS = -Wall -Werror -Wextra
+FLAGS_SO = -pedantic -fPIC -shared -o
 
 .PHONY: all clean fclean re
 
