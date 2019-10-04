@@ -1,7 +1,8 @@
-ifeq ($(HOSTTYPE),)
-	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
-endif
-NAME = libft_malloc_$(HOSTTYPE).so
+# ifeq ($(HOSTTYPE),)
+# 	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+# endif
+# NAME = libft_malloc_$(HOSTTYPE).so
+NAME = run
 CC = gcc
 
 INC = includes/
@@ -9,21 +10,21 @@ PREP_INCS = -I$(INC)
 
 SRC = malloc.c \
 	  free.c \
-	  realloc.c
+	  realloc.c \
+	  show_alloc_mem.c
 
 PATH_SRC = ./src/
-SRCS = $(addprefix $(PATH_SRC), $(SRC))
+SRCS = $(addprefix $(PATH_SRC), $(SRC)) main.c
 
 FLAGS = -Wall -Werror -Wextra
-FLAGS_SO = -pedantic -fPIC -shared -o
+# FLAGS_SO = -fPIC -shared -o
 
 .PHONY: all clean fclean re
 
 all: $(NAME)
 
-$(NAME): $(INC)
-	$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) $(FLAGS_SO) $@
-	# some ln things to do here
+$(NAME): $(INC) main.c
+	$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) -o $@ # $(FLAGS_SO) $@
 	@echo "Library $@ created"
 
 clean:
