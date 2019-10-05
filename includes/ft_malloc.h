@@ -6,7 +6,7 @@
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/02 15:26:52 by kyazdani          #+#    #+#             */
-/*   Updated: 2019/10/04 20:00:14 by kyazdani         ###   ########.fr       */
+/*   Updated: 2019/10/05 14:44:48 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,24 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-# define TINY 50
-# define SMALL 200
+# define TINY 128
+# define SMALL 512
 
 typedef struct      s_alloc
 {
     size_t          size;
     int             free;
-    struct s_alloc  *prev;
     struct s_alloc  *next;
 }                   t_alloc;
 
-t_alloc             *g_alloc;
+typedef struct      s_state
+{
+    t_alloc         *tiny;
+    t_alloc         *small;
+    t_alloc         *large;
+}                   t_state;
+
+t_state             g_state;
 
 void                free(void *ptr);
 void                *malloc(size_t size);

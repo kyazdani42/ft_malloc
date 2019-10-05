@@ -15,23 +15,27 @@
 #include <stdio.h>
 void    print_t_alloc(t_alloc *ptr)
 {
-    printf("ptr->free: %d\n", ptr->free);
-    printf("ptr->size %zu\n", ptr->size);
-    printf("ptr->prev %p\n", ptr->prev);
-    printf("ptr->next %p\n", ptr->next);
+    if (!ptr)
+        printf("Empty zone\n");
+    while (ptr)
+    {
+        printf("ptr: %p\n", ptr);
+        printf("ptr->free: %d\n", ptr->free);
+        printf("ptr->size: %zu\n", ptr->size);
+        printf("ptr->next: %p\n", ptr->next);
+        ptr = ptr->next;
+    }
 }
 
 void    show_alloc_mem(void)
 {
-    t_alloc *ptr;
-
     printf("pagesize: %d\n", getpagesize());
-    if (!g_alloc)
-        return;
-    ptr = g_alloc;
-    while (ptr)
-    {
-        print_t_alloc(ptr);
-        ptr = ptr->next;
-    }
+
+    printf("TINY:\n");
+    print_t_alloc(g_state.tiny);
+    printf("SMALL:\n");
+    print_t_alloc(g_state.small);
+    printf("LARGE:\n");
+    print_t_alloc(g_state.large);
 }
+

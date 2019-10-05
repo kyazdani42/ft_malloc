@@ -32,7 +32,6 @@ int     main()
         valid();
     else
         err();
-    show_alloc_mem();
 
     write_str("test: simple malloc ");
     if (malloc(10) != NULL)
