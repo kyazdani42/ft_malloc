@@ -11,18 +11,8 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-
-inline static void      *use_mmap(size_t len)
-{
-    return (mmap(
-                NULL,
-                len,
-                PROT_READ | PROT_WRITE,
-                MAP_ANON | MAP_PRIVATE,
-                -1,
-                0
-                ));
-}
+#include <stdio.h>
+#include <sys/errno.h>
 
 inline static size_t    get_size(size_t len)
 {
@@ -34,34 +24,65 @@ inline static size_t    get_size(size_t len)
     return pagesize * (len / pagesize + 1);
 }
 
-void    *allocate(size_t size, t_alloc **ptr)
+void    *new_zone(t_alloc **ptr, size_t size, size_t type_size)
 {
     size_t  mmap_size;
+    void    *ret;
 
-    mmap_size = get_size((size + sizeof(t_alloc)) * (size < SMALL ? 100 : 1));
+    mmap_size = get_size((type_size + HEADER) * (type_size + HEADER <= SMALL ? 100 : 1));
 
-    *ptr = use_mmap(mmap_size);
+    ret = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE,
+            MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (ret == MAP_FAILED)
+        return NULL;
+    *ptr = ret;
     (*ptr)->size = size;
     (*ptr)->free = 0;
 
-    if (size < SMALL) {
-        (*ptr)->next = (void *)*ptr + sizeof(t_alloc) + size; // + alignment ?
-        (*ptr)->next->size = mmap_size - (sizeof(t_alloc) + size);
-        (*ptr)->next->next = NULL;
+    if (size <= SMALL)
+    {
+        (*ptr)->next = (void *)*ptr + HEADER + size + 1; // + alignment ?
+        (*ptr)->next->size = mmap_size - (HEADER + size);
         (*ptr)->next->free = 1;
-    } else {
+        (*ptr)->next->next = NULL;
+    } else
         (*ptr)->next = NULL;
-    }
 
-    return (void *)*ptr + sizeof(t_alloc);
+    return (void *)*ptr + HEADER + 1;
+}
+
+void                    *allocate(t_alloc **ptr, size_t size, size_t type)
+{
+    t_alloc *tmp;
+    t_alloc *new_alloc;
+
+    if (!*ptr)
+        return new_zone(ptr, size, type);
+
+    tmp = *ptr;
+    while (tmp->next && (!tmp->free || (tmp->free && tmp->size < size + HEADER)))
+        tmp = tmp->next;
+
+    if (!tmp->free || (tmp->free && tmp->size < size + HEADER))
+        return new_zone(&tmp->next, size, type);
+
+    tmp->free = 0;
+    if (tmp->size < size + HEADER * 2)
+        return (void *)tmp + HEADER + 1;
+
+    new_alloc = (void *)tmp + size + HEADER + 1;
+    new_alloc->free = 1;
+    new_alloc->size = tmp->size - (size + HEADER + 1);
+    new_alloc->next = tmp->next;
+    tmp->size = size;
+    tmp->next = new_alloc;
+
+    return (void *)tmp + HEADER + 1;
 }
 
 void                    *malloc(size_t size)
 {
     static int  initialization = 1;
-
-    if (!size)
-        return (NULL);
 
     if (initialization)
     {
@@ -71,11 +92,11 @@ void                    *malloc(size_t size)
         initialization = 0;
     }
 
-    if (size < TINY)
-        return (allocate(size, &(g_state).tiny));
-    else if (size < SMALL)
-        return (allocate(size, &(g_state).small));
+    if (size <= TINY)
+        return (allocate(&g_state.tiny, size, TINY));
+    else if (size <= SMALL)
+        return (allocate(&g_state.small, size, SMALL));
     else
-        return allocate(size, &(g_state).large);
+        return allocate(&g_state.large, size, size);
 }
 

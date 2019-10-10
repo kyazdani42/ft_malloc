@@ -17,12 +17,13 @@ void    print_t_alloc(t_alloc *ptr)
 {
     if (!ptr)
         printf("Empty zone\n");
+    printf("t_alloc header size: %zu\n", sizeof(t_alloc));
     while (ptr)
     {
-        printf("ptr: %p\n", ptr);
-        printf("ptr->free: %d\n", ptr->free);
-        printf("ptr->size: %zu\n", ptr->size);
-        printf("ptr->next: %p\n", ptr->next);
+        printf("addr %p | ", ptr);
+        printf("free %d | ", ptr->free);
+        printf("size %zu | ", ptr->size);
+        printf("next %p\n\n", ptr->next);
         ptr = ptr->next;
     }
 }
@@ -33,9 +34,8 @@ void    show_alloc_mem(void)
 
     printf("TINY:\n");
     print_t_alloc(g_state.tiny);
-    printf("SMALL:\n");
-    print_t_alloc(g_state.small);
-    printf("LARGE:\n");
-    print_t_alloc(g_state.large);
+    /******* printf("SMALL:\n"); */ /******* print_t_alloc(g_state.small); */
+    /******* printf("LARGE:\n"); */
+    /******* print_t_alloc(g_state.large); */
 }
 

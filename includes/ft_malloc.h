@@ -29,6 +29,8 @@ typedef struct      s_alloc
     struct s_alloc  *next;
 }                   t_alloc;
 
+# define HEADER sizeof(t_alloc)
+
 typedef struct      s_state
 {
     t_alloc         *tiny;

@@ -1,42 +1,62 @@
 #include "ft_malloc.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-int     len(char *str)
+void    valid(void *to_print)
 {
-    int i;
-
-    i = 0;
-    while (str[i])
-        i++;
-    return i;
-}
-
-void    write_str(char *str)
-{
-    write(1, str, len(str));
-}
-
-void    valid(void)
-{
-    write_str("\x1b[32m✓\x1b[0m\n");
+    printf("\x1b[32m✓\x1b[0m %p\n", to_print);
 }
 
 void    err(void)
 {
-    write_str("\x1b[31m✕\x1b[0m\n");
+    printf("\x1b[31m✕\x1b[0m\n");
 }
 
 int     main()
 {
-    write_str("test: malloc(0) ");
-    if (malloc(0) == NULL)
-        valid();
-    else
-        err();
+    void    *test;
+    size_t  val;
+    int     i;
 
-    write_str("test: simple malloc ");
-    if (malloc(10) != NULL)
-        valid();
-    else
-        err();
-    show_alloc_mem();
+    i = -1;
+    printf("testing tiny allocs\n");
+    while (++i < 100)
+    {
+        val = rand() % 128;
+        /* printf("testing malloc(%d)\n", val); */
+        if (!(test = malloc(val)))
+            err();
+        /* else */
+        /*     valid(test); */
+    }
+
+    i = -1;
+    printf("testing small allocs\n");
+    while (++i < 100)
+    {
+        val = rand() % 512 + 128;
+        /* printf("testing malloc(%d)\n", val); */
+        if (!(test = malloc(val)))
+            err();
+        /* else */
+        /*     valid(test); */
+    }
+
+    i = -1;
+    printf("testing large allocs\n");
+    while (++i < 10000)
+    {
+        val = rand() % 1000 + 512;
+        /* printf("testing malloc(%d)\n", val); */
+        if (!(test = malloc(val)))
+        {
+            err();
+            show_alloc_mem();
+            printf("%zu\n", val);
+            exit(1);
+        }
+        /* else */
+        /*     valid(test); */
+    }
+        /* show_alloc_mem(); */
 }
