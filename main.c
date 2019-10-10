@@ -14,49 +14,16 @@ void    err(void)
 
 int     main()
 {
-    void    *test;
-    size_t  val;
-    int     i;
+    void    *ret;
+    void    *ret2;
+    void    *ret3;
 
-    i = -1;
-    printf("testing tiny allocs\n");
-    while (++i < 100)
-    {
-        val = rand() % 128;
-        /* printf("testing malloc(%d)\n", val); */
-        if (!(test = malloc(val)))
-            err();
-        /* else */
-        /*     valid(test); */
-    }
+    ret = malloc(100);
+    ret2 = malloc(10);
+    ret3 = malloc(40);
 
-    i = -1;
-    printf("testing small allocs\n");
-    while (++i < 100)
-    {
-        val = rand() % 512 + 128;
-        /* printf("testing malloc(%d)\n", val); */
-        if (!(test = malloc(val)))
-            err();
-        /* else */
-        /*     valid(test); */
-    }
+    show_alloc_mem();
+    free(ret2);
+    show_alloc_mem();
 
-    i = -1;
-    printf("testing large allocs\n");
-    while (++i < 10000)
-    {
-        val = rand() % 1000 + 512;
-        /* printf("testing malloc(%d)\n", val); */
-        if (!(test = malloc(val)))
-        {
-            err();
-            show_alloc_mem();
-            printf("%zu\n", val);
-            exit(1);
-        }
-        /* else */
-        /*     valid(test); */
-    }
-        /* show_alloc_mem(); */
 }

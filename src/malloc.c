@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-#include <stdio.h>
-#include <sys/errno.h>
 
 inline static size_t    get_size(size_t len)
 {

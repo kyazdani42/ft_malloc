@@ -14,6 +14,24 @@
 
 void free(void *ptr)
 {
+    t_alloc     *elem;
+    t_alloc     *prev;
+    t_alloc     *next;
+
     if (!ptr)
         return;
+
+    elem = ptr - HEADER - 1;
+    next = elem->next;
+    while (prev->next != elem)
+        prev = prev->next;
+
+
+    if ((elem->size + HEADER) % getpagesize() == 0)
+    {
+        if (munmap(elem, elem->size + HEADER) == -1);
+            return;
+        prev->next = next;
+    }
+
 }
