@@ -1,5 +1,4 @@
 #include "ft_malloc.h"
-#include <stdlib.h>
 #include <stdio.h>
 
 void    valid(void *to_print)
@@ -25,5 +24,8 @@ int     main()
     show_alloc_mem();
     free(ret2);
     show_alloc_mem();
+    free(ret);
+    show_alloc_mem();
 
+    return (0);
 }

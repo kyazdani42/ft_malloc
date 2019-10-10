@@ -23,13 +23,15 @@ void free(void *ptr)
 
     elem = ptr - HEADER - 1;
     next = elem->next;
-    while (prev->next != elem)
-        prev = prev->next;
-
+    prev = elem;
+    // SIGSEGV when elem is first in the list
+    // might consider implementing a pointer to the previous element in t_alloc
+    while (prev && prev->next != elem)
+        prev = (void *)prev - 1;
 
     if ((elem->size + HEADER) % getpagesize() == 0)
     {
-        if (munmap(elem, elem->size + HEADER) == -1);
+        if (munmap(elem, elem->size + HEADER) == -1)
             return;
         prev->next = next;
     }

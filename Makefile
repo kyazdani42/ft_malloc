@@ -16,7 +16,11 @@ SRC = malloc.c \
 PATH_SRC = ./src/
 SRCS = $(addprefix $(PATH_SRC), $(SRC)) main.c
 
-FLAGS = -Wall -Werror -Wextra
+FLAGS = -Wall -Wextra
+
+ifndef NOERR
+	FLAGS += -Werror
+endif
 # FLAGS_SO = -fPIC -shared -o
 
 .PHONY: all clean fclean re
