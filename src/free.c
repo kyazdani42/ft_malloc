@@ -28,18 +28,20 @@ void free(void *ptr)
     prev = elem->prev;
 
     elem->free = 1;
-    if (prev && prev->free)
+    while (prev && prev->free)
     {
         prev->size += HEADER + elem->size;
-        prev->next = next;
+        prev->next = elem->next;
         elem = prev;
+        prev = prev->prev;
     }
-    if (next && next->free)
+    while (next && next->free)
     {
         elem->next = next->next;
         elem->size += HEADER + next->size;
         if (elem->next)
             elem->next->prev = elem;
+        next = next->next;
     }
 
     if ((elem->size + HEADER) % getpagesize() == 0)

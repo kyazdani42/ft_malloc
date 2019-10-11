@@ -4,4 +4,4 @@ libft_malloc*
 *.o
 .vscode
 *.swp
-run
+tests/run_tests
