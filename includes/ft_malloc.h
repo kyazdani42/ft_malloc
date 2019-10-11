@@ -27,6 +27,7 @@ typedef struct      s_alloc
     size_t          size;
     int             free;
     struct s_alloc  *next;
+    struct s_alloc  *prev;
 }                   t_alloc;
 
 # define HEADER sizeof(t_alloc)

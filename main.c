@@ -18,13 +18,14 @@ int     main()
     void    *ret3;
 
     ret = malloc(100);
+    show_alloc_mem();
     ret2 = malloc(10);
     ret3 = malloc(40);
-
-    show_alloc_mem();
     free(ret2);
     show_alloc_mem();
     free(ret);
+    show_alloc_mem();
+    free(ret3);
     show_alloc_mem();
 
     return (0);

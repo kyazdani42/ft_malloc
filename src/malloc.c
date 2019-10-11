@@ -22,7 +22,7 @@ inline static size_t    get_size(size_t len)
     return pagesize * (len / pagesize + 1);
 }
 
-void    *new_zone(t_alloc **ptr, size_t size, size_t type_size)
+void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
 {
     size_t  mmap_size;
     void    *ret;
@@ -34,15 +34,17 @@ void    *new_zone(t_alloc **ptr, size_t size, size_t type_size)
     if (ret == MAP_FAILED)
         return NULL;
     *ptr = ret;
+    (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
 
     if (size <= SMALL)
     {
         (*ptr)->next = (void *)*ptr + HEADER + size + 1; // + alignment ?
-        (*ptr)->next->size = mmap_size - (HEADER + size);
+        (*ptr)->next->size = mmap_size - (HEADER * 2 + size);
         (*ptr)->next->free = 1;
         (*ptr)->next->next = NULL;
+        (*ptr)->next->prev = *ptr;
     } else
         (*ptr)->next = NULL;
 
@@ -55,23 +57,28 @@ void                    *allocate(t_alloc **ptr, size_t size, size_t type)
     t_alloc *new_alloc;
 
     if (!*ptr)
-        return new_zone(ptr, size, type);
+        return new_zone(ptr, NULL, size, type);
 
     tmp = *ptr;
     while (tmp->next && (!tmp->free || (tmp->free && tmp->size < size + HEADER)))
         tmp = tmp->next;
 
     if (!tmp->free || (tmp->free && tmp->size < size + HEADER))
-        return new_zone(&tmp->next, size, type);
+        return new_zone(&tmp->next, tmp, size, type);
 
     tmp->free = 0;
+
     if (tmp->size < size + HEADER * 2)
         return (void *)tmp + HEADER + 1;
 
-    new_alloc = (void *)tmp + size + HEADER + 1;
+    new_alloc = (void *)tmp + HEADER + size + 1;
     new_alloc->free = 1;
-    new_alloc->size = tmp->size - (size + HEADER + 1);
+    new_alloc->size = tmp->size - (size + HEADER);
     new_alloc->next = tmp->next;
+    new_alloc->prev = tmp;
+    if (new_alloc->next)
+        new_alloc->next->prev = new_alloc;
+
     tmp->size = size;
     tmp->next = new_alloc;
 
