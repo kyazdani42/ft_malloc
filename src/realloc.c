@@ -14,7 +14,6 @@
 
 void	*realloc(void *ptr, size_t size)
 {
-    (void)ptr;
-    (void)size;
-    return (NULL);
+    free(ptr);
+    return malloc(size);
 }
