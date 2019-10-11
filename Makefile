@@ -21,7 +21,7 @@ SRCS = $(addprefix $(SRC_PATH), $(SRC))
 OBJ_PATH = obj
 OBJ = $(addprefix $(OBJ_PATH)/, $(SRC:%.c=%.o))
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -fPIC
 
 .PHONY: all clean fclean re
 
