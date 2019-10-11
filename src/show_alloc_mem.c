@@ -34,7 +34,7 @@ void    show_alloc_mem(void)
     print_t_alloc(g_state.tiny);
     /* printf("SMALL:\n"); */
     /* print_t_alloc(g_state.small); */
-    /* printf("LARGE:\n"); */
-    /* print_t_alloc(g_state.large); */
+    printf("\n\x1b[1mLARGE:\x1b[0m\n\n");
+    print_t_alloc(g_state.large);
 }
 

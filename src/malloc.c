@@ -37,16 +37,11 @@ void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
     (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
-
-    if (size <= SMALL)
-    {
-        (*ptr)->next = (void *)*ptr + HEADER + size + 1; // + alignment ?
-        (*ptr)->next->size = mmap_size - (HEADER * 2 + size);
-        (*ptr)->next->free = 1;
-        (*ptr)->next->next = NULL;
-        (*ptr)->next->prev = *ptr;
-    } else
-        (*ptr)->next = NULL;
+    (*ptr)->next = (void *)*ptr + HEADER + size + 1; // + alignment ?
+    (*ptr)->next->size = mmap_size - (HEADER * 2 + size);
+    (*ptr)->next->free = 1;
+    (*ptr)->next->next = NULL;
+    (*ptr)->next->prev = *ptr;
 
     return (void *)*ptr + HEADER + 1;
 }

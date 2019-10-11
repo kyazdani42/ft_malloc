@@ -12,26 +12,14 @@
 
 #include "ft_malloc.h"
 
-void free(void *ptr)
+void defrag(t_alloc *elem, t_alloc *prev, t_alloc *next)
 {
-    t_alloc     *elem;
-    t_alloc     *prev;
-    t_alloc     *next;
-    size_t      size;
-
-    if (!ptr)
-        return;
-
-    elem = ptr - HEADER - 1;
-    size = elem->size;
-    next = elem->next;
-    prev = elem->prev;
-
-    elem->free = 1;
     while (prev && prev->free)
     {
         prev->size += HEADER + elem->size;
         prev->next = elem->next;
+        if (prev->next)
+            prev->next->prev = prev;
         elem = prev;
         prev = prev->prev;
     }
@@ -43,18 +31,43 @@ void free(void *ptr)
             elem->next->prev = elem;
         next = next->next;
     }
+}
 
+void    *get_zone(t_alloc *elem)
+{
+    t_alloc *tmp;
+
+    tmp = elem;
+    while (tmp->prev)
+        tmp = tmp->prev;
+    if (tmp == g_state.tiny)
+        return &g_state.tiny;
+    else if (tmp == g_state.small)
+        return &g_state.small;
+    else
+        return &g_state.large;
+}
+
+void free(void *ptr)
+{
+    t_alloc     *elem;
+    t_alloc     **state;
+
+    if (!ptr) return;
+
+
+    elem = ptr - HEADER - 1;
+
+
+    elem->free = 1;
+    defrag(elem, elem->prev, elem->next);
     if ((elem->size + HEADER) % getpagesize() == 0)
     {
+        state = get_zone(elem);
+        *state = elem->prev ? elem->prev : elem->next;
 
         if (munmap(elem, elem->size + HEADER) == -1)
             return;
-        if (size <= TINY)
-            g_state.tiny = NULL;
-        else if (size <= SMALL)
-            g_state.small = NULL;
-        else
-            g_state.large = NULL;
     }
 }
 
