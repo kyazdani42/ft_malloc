@@ -22,15 +22,14 @@ inline static size_t    get_size(size_t len)
     return pagesize * (len / pagesize + 1);
 }
 
-void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
+static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
 {
     size_t  mmap_size;
     void    *ret;
 
     mmap_size = get_size((type_size + HEADER) * (type_size + HEADER <= SMALL ? 100 : 1));
 
-    ret = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE,
-            MAP_ANON | MAP_PRIVATE, -1, 0);
+    ret = mmap(NULL, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;
     *ptr = ret;
@@ -46,7 +45,7 @@ void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
     return (void *)*ptr + HEADER + 1;
 }
 
-void                    *allocate(t_alloc **ptr, size_t size, size_t type)
+static void                    *allocate(t_alloc **ptr, size_t size, size_t type)
 {
     t_alloc *tmp;
     t_alloc *new_alloc;
@@ -97,6 +96,5 @@ void                    *malloc(size_t size)
     else if (size <= SMALL)
         return (allocate(&g_state.small, size, SMALL));
     else
-        return allocate(&g_state.large, size, size);
+        return (allocate(&g_state.large, size, size));
 }
-

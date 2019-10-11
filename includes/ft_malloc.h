@@ -21,6 +21,8 @@
 
 # define TINY 128
 # define SMALL 512
+# define PROT (PROT_READ | PROT_WRITE)
+# define FLAGS (MAP_ANON | MAP_PRIVATE)
 
 typedef struct      s_alloc
 {
@@ -44,6 +46,9 @@ t_state             g_state;
 void                free(void *ptr);
 void                *malloc(size_t size);
 void                *realloc(void *ptr, size_t size);
+void                putstr(char *str);
+void                putnbr(size_t nb);
+void                putaddr(void *ptr);
 void                show_alloc_mem();
 void                show_alloc_mem_ex();
 

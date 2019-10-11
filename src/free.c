@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-void defrag(t_alloc *elem, t_alloc *prev, t_alloc *next)
+static void defrag(t_alloc *elem, t_alloc *prev, t_alloc *next)
 {
     while (prev && prev->free)
     {
@@ -33,7 +33,7 @@ void defrag(t_alloc *elem, t_alloc *prev, t_alloc *next)
     }
 }
 
-void    *get_zone(t_alloc *elem)
+static void    *get_zone(t_alloc *elem)
 {
     t_alloc *tmp;
 
@@ -55,10 +55,7 @@ void free(void *ptr)
 
     if (!ptr) return;
 
-
     elem = ptr - HEADER - 1;
-
-
     elem->free = 1;
     defrag(elem, elem->prev, elem->next);
     if ((elem->size + HEADER) % getpagesize() == 0)

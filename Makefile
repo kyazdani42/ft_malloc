@@ -10,31 +10,39 @@ PREP_INCS = -I$(INC)
 SRC = malloc.c \
 	  free.c \
 	  realloc.c \
-	  show_alloc_mem.c
+	  show_alloc_mem.c \
+	  utils.c
 
-PATH_SRC = ./src/
-SRCS = $(addprefix $(PATH_SRC), $(SRC))
+SRC_PATH = src
+vpath %.c $(SRC_PATH)
 
-FLAGS_SO = -fPIC -shared
-FLAGS = -Wall -Wextra
+SRCS = $(addprefix $(SRC_PATH), $(SRC))
 
-ifndef NOERR
-	FLAGS += -Werror
-endif
+OBJ_PATH = obj
+OBJ = $(addprefix $(OBJ_PATH)/, $(SRC:%.c=%.o))
 
+FLAGS = -Wall -Wextra -Werror
 
 .PHONY: all clean fclean re
 
 all: $(NAME)
 
-$(NAME): $(INC) $(SRCS)
-	$(CC) $(FLAGS) $(PREP_INCS) $(SRCS) $(FLAGS_SO) -o $@
+$(NAME): $(OBJ)
+	$(CC) -shared -o $@ $^
+	@rm -f libft_malloc.so
+	@ln -sf $@ libft_malloc.so
 	@echo "Library $@ created"
 
+$(OBJ_PATH)/%.o: %.c
+	@mkdir -p obj
+	$(CC) $(FLAGS) $(PREP_INCS) -c $< -o $@
+
 clean:
-	@rm -f $(NAME)
-	@echo "Library deleted"
+	@rm -rf obj
+	@echo "objects deleted"
 
 fclean: clean
+	@rm -f $(NAME) libft_malloc.so
+	@echo "lib deleted"
 
 re: fclean all

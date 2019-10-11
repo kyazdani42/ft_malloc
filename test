@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd ./tests
-make re
-./run_tests
-
