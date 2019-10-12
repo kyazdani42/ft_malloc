@@ -22,28 +22,25 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_
 {
     size_t  mmap_size;
     size_t  next_size;
-    size_t  aligned_size;
     void    *ret;
 
-    mmap_size = get_multiple_of((type_size + HEADER) * (size <= SMALL ? 100 : 1), getpagesize());
+    mmap_size = get_multiple_of(type_size * (size <= SMALL ? 100 : 1) + HEADER, getpagesize());
     ret = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;
-
     *ptr = ret;
     (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
 
-    aligned_size = get_multiple_of(size, 2);
-    next_size = mmap_size - (HEADER * 2 + aligned_size);
+    next_size = mmap_size - (HEADER * 2 + size);
     if (!next_size)
     {
         (*ptr)->next = NULL;
         return (void *)*ptr + HEADER;
     }
 
-    (*ptr)->next = (void *)*ptr + HEADER + aligned_size;
+    (*ptr)->next = (void *)*ptr + HEADER + size;
     (*ptr)->next->size = next_size;
     (*ptr)->next->free = 1;
     (*ptr)->next->next = NULL;
@@ -68,30 +65,26 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
         return new_zone(&tmp->next, tmp, size, type);
 
     tmp->free = 0;
-
-    // if the current size is smaller than a header a bloc and another header
-    if (tmp->size < get_multiple_of(size, 2) + HEADER * 2)
+    if (tmp->size < size + HEADER * 2)
         return (void *)tmp + HEADER;
 
-    // the next free bloc is header and block away from current header
-    new_alloc = (void *)tmp + HEADER + get_multiple_of(size, 2);
-    new_alloc->free = 1;
-    // the next free bloc size is the current block size minus the new size and the header size
-    new_alloc->size = tmp->size - (get_multiple_of(size, 2) + HEADER);
+    new_alloc = (void *)tmp + HEADER + size;
+    new_alloc->size = tmp->size - (size + HEADER);
     new_alloc->next = tmp->next;
-    new_alloc->prev = tmp;
     if (new_alloc->next)
         new_alloc->next->prev = new_alloc;
+    new_alloc->prev = tmp;
+    new_alloc->free = 1;
 
     tmp->size = size;
     tmp->next = new_alloc;
-
     return (void *)tmp + HEADER;
 }
 
 void                    *malloc(size_t size)
 {
     static int      initialization = 1;
+    size_t          aligned_size;
     struct rlimit   limits;
 
     if (initialization)
@@ -104,10 +97,12 @@ void                    *malloc(size_t size)
 
     getrlimit(RLIMIT_DATA, &limits);
 
-    if (size <= TINY)
-        return (allocate(&g_state.tiny, size, TINY));
-    else if (size <= SMALL)
-        return (allocate(&g_state.small, size, SMALL));
+
+    aligned_size = get_multiple_of(size, 16);
+    if (aligned_size <= TINY)
+        return (allocate(&g_state.tiny, aligned_size, TINY));
+    else if (aligned_size <= SMALL)
+        return (allocate(&g_state.small, aligned_size, SMALL));
     else
-        return (allocate(&g_state.large, size, size));
+        return (allocate(&g_state.large, aligned_size, aligned_size));
 }
