@@ -33,7 +33,7 @@ $(NAME): $(OBJ)
 	@ln -sf $@ libft_malloc.so
 	@echo "Library $@ created"
 
-$(OBJ_PATH)/%.o: %.c
+$(OBJ_PATH)/%.o: %.c $(INC)
 	@mkdir -p obj
 	$(CC) $(FLAGS) $(PREP_INCS) -c $< -o $@
 

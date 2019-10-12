@@ -18,7 +18,7 @@ static void    print_t_alloc(t_alloc *ptr)
         putstr("Empty zone\n");
     while (ptr)
     {
-        putaddr((void *)ptr + HEADER + 1);
+        putaddr((void *)ptr + HEADER);
         putstr(" - ");
         putaddr((void *)ptr + HEADER + ptr->size);
         putstr(" : ");

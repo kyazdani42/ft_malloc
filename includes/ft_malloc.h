@@ -19,8 +19,8 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-# define TINY 128
-# define SMALL 512
+# define TINY 512
+# define SMALL 4096
 # define PROT (PROT_READ | PROT_WRITE)
 # define FLAGS (MAP_ANON | MAP_PRIVATE)
 
