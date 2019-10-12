@@ -12,12 +12,6 @@
 
 #include "ft_malloc.h"
 
-inline static size_t    get_multiple_of(size_t len, size_t alignment) {
-    if (len % alignment == 0)
-        return len;
-    return alignment * (len / alignment + 1);
-}
-
 static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
 {
     size_t  mmap_size;
@@ -86,6 +80,7 @@ void                    *malloc(size_t size)
     static int      initialization = 1;
     size_t          aligned_size;
     struct rlimit   limits;
+    void            *ret;
 
     if (initialization)
     {
@@ -97,12 +92,12 @@ void                    *malloc(size_t size)
 
     getrlimit(RLIMIT_DATA, &limits);
 
-
     aligned_size = get_multiple_of(size, 16);
     if (aligned_size <= TINY)
-        return (allocate(&g_state.tiny, aligned_size, TINY));
+        ret = allocate(&g_state.tiny, aligned_size, TINY);
     else if (aligned_size <= SMALL)
-        return (allocate(&g_state.small, aligned_size, SMALL));
+        ret = allocate(&g_state.small, aligned_size, SMALL);
     else
-        return (allocate(&g_state.large, aligned_size, aligned_size));
+        ret = allocate(&g_state.large, aligned_size, aligned_size);
+    return ret;
 }

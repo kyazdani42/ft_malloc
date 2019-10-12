@@ -11,6 +11,7 @@ SRC = malloc.c \
 	  free.c \
 	  realloc.c \
 	  show_alloc_mem.c \
+	  common.c \
 	  utils.c
 
 SRC_PATH = src

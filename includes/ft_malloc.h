@@ -49,6 +49,8 @@ void                *realloc(void *ptr, size_t size);
 void                putstr(char *str);
 void                putnbr(size_t nb);
 void                putaddr(void *ptr);
+t_alloc             *get_header_from_addr(void *ptr);
+size_t              get_multiple_of(size_t len, size_t alignment);
 void                show_alloc_mem();
 void                show_alloc_mem_ex();
 

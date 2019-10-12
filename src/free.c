@@ -53,34 +53,6 @@ static void    *get_zone(t_alloc *elem)
         return &g_state.large;
 }
 
-static int      valid(void *ptr)
-{
-    t_alloc *tmp;
-
-    tmp = g_state.large;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (0);
-        tmp = tmp->next;
-    }
-    tmp = g_state.small;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (0);
-        tmp = tmp->next;
-    }
-    tmp = g_state.tiny;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (0);
-        tmp = tmp->next;
-    }
-    return (1);
-}
-
 void free(void *ptr)
 {
     t_alloc     *elem;
@@ -88,9 +60,9 @@ void free(void *ptr)
 
     if (!ptr) return;
 
-    if (valid(ptr) == 1)
+    elem = get_header_from_addr(ptr);
+    if (elem == NULL)
         return;
-    elem = ptr - HEADER;
     elem->free = 1;
     defrag(&elem);
     if ((elem->size + HEADER) % getpagesize() == 0)
