@@ -36,13 +36,13 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_
     (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
-    (*ptr)->next = (void *)*ptr + HEADER + size + 1; // + alignment ?
+    (*ptr)->next = (void *)*ptr + HEADER + size;
     (*ptr)->next->size = mmap_size - (HEADER * 2 + size);
     (*ptr)->next->free = 1;
     (*ptr)->next->next = NULL;
     (*ptr)->next->prev = *ptr;
 
-    return (void *)*ptr + HEADER + 1;
+    return (void *)*ptr + HEADER;
 }
 
 static void                    *allocate(t_alloc **ptr, size_t size, size_t type)
@@ -62,10 +62,10 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
 
     tmp->free = 0;
 
-    if (tmp->size < size + HEADER * 2)
-        return (void *)tmp + HEADER + 1;
+    if (tmp->size <= size + HEADER * 2)
+        return (void *)tmp + HEADER;
 
-    new_alloc = (void *)tmp + HEADER + size + 1;
+    new_alloc = (void *)tmp + HEADER + size;
     new_alloc->free = 1;
     new_alloc->size = tmp->size - (size + HEADER);
     new_alloc->next = tmp->next;
@@ -76,7 +76,7 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
     tmp->size = size;
     tmp->next = new_alloc;
 
-    return (void *)tmp + HEADER + 1;
+    return (void *)tmp + HEADER;
 }
 
 void                    *malloc(size_t size)

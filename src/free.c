@@ -55,21 +55,21 @@ static int      valid(void *ptr)
     tmp = g_state.large;
     while (tmp)
     {
-        if ((void *)tmp + HEADER + 1 == ptr)
+        if ((void *)tmp + HEADER == ptr)
             return (0);
         tmp = tmp->next;
     }
     tmp = g_state.small;
     while (tmp)
     {
-        if ((void *)tmp + HEADER + 1 == ptr)
+        if ((void *)tmp + HEADER == ptr)
             return (0);
         tmp = tmp->next;
     }
     tmp = g_state.tiny;
     while (tmp)
     {
-        if ((void *)tmp + HEADER + 1 == ptr)
+        if ((void *)tmp + HEADER == ptr)
             return (0);
         tmp = tmp->next;
     }
@@ -85,7 +85,7 @@ void free(void *ptr)
 
     if (valid(ptr) == 1)
         return;
-    elem = ptr - HEADER - 1;
+    elem = ptr - HEADER;
     elem->free = 1;
     defrag(elem, elem->prev, elem->next);
     if ((elem->size + HEADER) % getpagesize() == 0)
