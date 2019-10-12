@@ -48,6 +48,34 @@ static void    *get_zone(t_alloc *elem)
         return &g_state.large;
 }
 
+static int      valid(void *ptr)
+{
+    t_alloc *tmp;
+
+    tmp = g_state.large;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER + 1 == ptr)
+            return (0);
+        tmp = tmp->next;
+    }
+    tmp = g_state.small;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER + 1 == ptr)
+            return (0);
+        tmp = tmp->next;
+    }
+    tmp = g_state.tiny;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER + 1 == ptr)
+            return (0);
+        tmp = tmp->next;
+    }
+    return (1);
+}
+
 void free(void *ptr)
 {
     t_alloc     *elem;
@@ -55,6 +83,8 @@ void free(void *ptr)
 
     if (!ptr) return;
 
+    if (valid(ptr) == 1)
+        return;
     elem = ptr - HEADER - 1;
     elem->free = 1;
     defrag(elem, elem->prev, elem->next);

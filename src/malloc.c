@@ -29,7 +29,7 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_
 
     mmap_size = get_size((type_size + HEADER) * (type_size + HEADER <= SMALL ? 100 : 1));
 
-    ret = mmap(NULL, mmap_size, PROT, FLAGS, -1, 0);
+    ret = mmap(0, mmap_size, PROT, FLAGS, 0, 0);
     if (ret == MAP_FAILED)
         return NULL;
     *ptr = ret;

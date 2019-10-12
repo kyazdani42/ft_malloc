@@ -26,8 +26,8 @@
 
 typedef struct      s_alloc
 {
+    char            free;
     size_t          size;
-    int             free;
     struct s_alloc  *next;
     struct s_alloc  *prev;
 }                   t_alloc;
