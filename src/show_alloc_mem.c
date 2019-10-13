@@ -24,7 +24,7 @@ static void    print_t_alloc(t_alloc *ptr)
             putstr("\e[35m");
         putaddr((void *)ptr + HEADER);
         putstr(" - ");
-        putaddr((void *)ptr + HEADER + ptr->size);
+        putaddr((void *)ptr + HEADER + ptr->size - 1);
         putstr(" : ");
         putnbr(ptr->size);
         putstr(" octets\n");

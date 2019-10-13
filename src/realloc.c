@@ -34,9 +34,16 @@ void	*realloc(void *ptr, size_t size)
     aligned_size = get_multiple_of(size, 16);
     if (header->size == aligned_size)
         return (ptr);
+    if (header->size >= aligned_size + HEADER)
+    {
+        header->size = aligned_size;
+        header->next = (void *)header + aligned_size;
+        header->next->free = 1;
+        header->next->size = header->size - aligned_size - HEADER;
+        return (ptr);
+    }
     if (header->next && header->next->free && header->next->size + HEADER + header->size >= aligned_size)
     {
-
         new_next_size = header->next->size - (aligned_size - header->size);
         header->size = aligned_size;
         header->next = (void *)header + HEADER + aligned_size;
@@ -45,5 +52,5 @@ void	*realloc(void *ptr, size_t size)
     }
 
     free(ptr);
-    return malloc(size);
+    return (malloc(size));
 }
