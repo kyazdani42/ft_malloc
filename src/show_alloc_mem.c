@@ -18,12 +18,17 @@ static void    print_t_alloc(t_alloc *ptr)
         putstr("Empty zone\n");
     while (ptr)
     {
+        if (ptr->free)
+            putstr("\e[32m");
+        else
+            putstr("\e[35m");
         putaddr((void *)ptr + HEADER);
         putstr(" - ");
         putaddr((void *)ptr + HEADER + ptr->size);
         putstr(" : ");
         putnbr(ptr->size);
         putstr(" octets\n");
+        putstr("\e[0m");
         ptr = ptr->next;
     }
 }
