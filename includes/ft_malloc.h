@@ -17,6 +17,7 @@
 # include <sys/mman.h>
 # include <sys/resource.h>
 # include <sys/time.h>
+# include <limits.h>
 # include <pthread.h>
 # include <unistd.h>
 
@@ -47,6 +48,9 @@ t_state             g_state;
 void                free(void *ptr);
 void                *malloc(size_t size);
 void                *realloc(void *ptr, size_t size);
+void                *calloc(size_t count, size_t size);
+void                *reallocf(void *ptr, size_t size);
+void                *valloc(size_t size);
 
 void                putstr(char *str);
 void                putnbr(size_t nb);
