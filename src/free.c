@@ -19,7 +19,7 @@ static void     defrag(t_alloc **elem)
 
     prev = (*elem)->prev;
     next = (*elem)->next;
-    while (prev && prev->free)
+    while (prev && prev->free && prev_valid(*elem))
     {
         prev->size += HEADER + (*elem)->size;
         prev->next = (*elem)->next;
@@ -28,7 +28,7 @@ static void     defrag(t_alloc **elem)
         *elem = prev;
         prev = prev->prev;
     }
-    while (next && next->free)
+    while (next && next->free && next_valid(*elem))
     {
         (*elem)->next = next->next;
         (*elem)->size += HEADER + next->size;

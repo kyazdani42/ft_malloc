@@ -34,3 +34,12 @@ t_alloc  *get_header_from_addr(void *ptr)
     return (NULL);
 }
 
+int     next_valid(t_alloc *alloc)
+{
+    return alloc->next && (void *)alloc + alloc->size == alloc->next;
+}
+
+int     prev_valid(t_alloc *alloc)
+{
+    return alloc->prev && (void *)alloc - alloc->prev->size - HEADER == alloc->prev;
+}

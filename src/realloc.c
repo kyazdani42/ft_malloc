@@ -42,7 +42,8 @@ void	*realloc(void *ptr, size_t size)
         header->next->size = header->size - aligned_size - HEADER;
         return (ptr);
     }
-    if (header->next && header->next->free && header->next->size + HEADER + header->size >= aligned_size)
+    if (header->next && header->next->free && next_valid(header)
+        && header->next->size + HEADER + header->size >= aligned_size)
     {
         new_next_size = header->next->size - (aligned_size - header->size);
         header->size = aligned_size;
