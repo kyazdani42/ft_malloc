@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-static void defrag(t_alloc **elem)
+static void     defrag(t_alloc **elem)
 {
     t_alloc *prev;
     t_alloc *next;
@@ -32,9 +32,9 @@ static void defrag(t_alloc **elem)
     {
         (*elem)->next = next->next;
         (*elem)->size += HEADER + next->size;
-        if ((*elem)->next)
-            (*elem)->next->prev = *elem;
         next = next->next;
+        if (next)
+            next->prev = *elem;
     }
 }
 

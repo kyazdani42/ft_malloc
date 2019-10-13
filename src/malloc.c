@@ -78,9 +78,12 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
 void                    *malloc(size_t size)
 {
     static int      initialization = 1;
+    static          pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     size_t          aligned_size;
     struct rlimit   limits;
     void            *ret;
+
+    pthread_mutex_lock(&mutex);
 
     if (initialization)
     {
@@ -99,5 +102,7 @@ void                    *malloc(size_t size)
         ret = allocate(&g_state.small, aligned_size, SMALL);
     else
         ret = allocate(&g_state.large, aligned_size, aligned_size);
+
+    pthread_mutex_unlock(&mutex);
     return ret;
 }

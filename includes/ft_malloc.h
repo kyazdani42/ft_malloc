@@ -17,6 +17,7 @@
 # include <sys/mman.h>
 # include <sys/resource.h>
 # include <sys/time.h>
+# include <pthread.h>
 # include <unistd.h>
 
 # define TINY 512
