@@ -8,6 +8,7 @@ INC = includes/
 PREP_INCS = -I$(INC)
 
 SRC = malloc.c \
+	  calloc.c \
 	  free.c \
 	  realloc.c \
 	  show_alloc_mem.c \
