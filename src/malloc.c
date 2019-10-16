@@ -83,7 +83,6 @@ void                    *malloc(size_t size)
     static int      initialization = 1;
     size_t          aligned_size;
     void            *ret;
-    /* struct rlimit   limits; */
 
     if (initialization)
     {
@@ -96,7 +95,6 @@ void                    *malloc(size_t size)
 
     pthread_mutex_lock(&g_mutex);
 
-    /* getrlimit(RLIMIT_DATA, &limits); */
     aligned_size = get_multiple_of(size, 16);
     if (aligned_size <= TINY)
         ret = allocate(&g_state.tiny, aligned_size, TINY_ZONE);
