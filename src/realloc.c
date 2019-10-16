@@ -25,7 +25,7 @@ static void	copy_memory(void *to, void *from, size_t n)
     }
 }
 
-void	*realloc(void *ptr, size_t size)
+void	*actual_realloc(void *ptr, size_t size)
 {
     t_alloc     *header;
     void        *new_value;
@@ -63,4 +63,14 @@ void	*realloc(void *ptr, size_t size)
     copy_memory(new_value, ptr, header->size);
     free(ptr);
     return (new_value);
+}
+
+void    *realloc(void *ptr, size_t size)
+{
+    void    *ret;
+
+    pthread_mutex_lock(&g_mutex);
+    ret = actual_realloc(ptr, size);
+    pthread_mutex_unlock(&g_mutex);
+    return (ret);
 }

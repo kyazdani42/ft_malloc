@@ -38,12 +38,31 @@ static void     defrag(t_alloc **elem)
     }
 }
 
-void free(void *ptr)
+static t_alloc  **get_zone(t_alloc *elem)
+{
+    t_alloc *tmp;
+
+    tmp = elem;
+    while (tmp->prev)
+        tmp = tmp->prev;
+    if (tmp == g_state.tiny)
+        return &g_state.tiny;
+    else if (tmp == g_state.small)
+        return &g_state.small;
+    else if (tmp == g_state.large)
+        return &g_state.large;
+    else
+        return (NULL);
+}
+
+static void  actual_free(void *ptr)
 {
     t_alloc     *elem;
     t_alloc     *previous;
+    t_alloc     **zone;
 
-    if (!ptr) return;
+    if (!ptr)
+        return;
 
     elem = get_header_from_addr(ptr);
     if (elem == NULL)
@@ -62,8 +81,21 @@ void free(void *ptr)
         previous = elem->prev;
         if (previous)
             previous->next = elem->next;
+        else
+        {
+            if (!(zone = get_zone(elem)))
+                return;
+            *zone = elem->next;
+        }
         if (munmap(elem, elem->size + HEADER) == -1)
             return;
     }
+}
+
+void free(void *ptr)
+{
+    pthread_mutex_lock(&g_mutex);
+    actual_free(ptr);
+    pthread_mutex_unlock(&g_mutex);
 }
 

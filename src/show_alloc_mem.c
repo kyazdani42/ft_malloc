@@ -35,6 +35,7 @@ static void    print_t_alloc(t_alloc *ptr)
 
 void    show_alloc_mem(void)
 {
+    pthread_mutex_lock(&g_mutex);
     putstr("------------------------------------------------------- \n");
     putstr("\x1b[1mTINY :\x1b[0m ");
     putaddr(g_state.tiny);
@@ -51,5 +52,6 @@ void    show_alloc_mem(void)
     putstr("\n");
     print_t_alloc(g_state.large);
     putstr("------------------------------------------------------- \n");
+    pthread_mutex_unlock(&g_mutex);
 }
 

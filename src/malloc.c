@@ -18,7 +18,7 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t zone_
     size_t  next_size;
     void    *ret;
 
-    mmap_size = get_multiple_of(zone_size, getpagesize());
+    mmap_size = get_multiple_of(zone_size, PS);
     ret = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;

@@ -24,6 +24,14 @@
 # define PROT (PROT_READ | PROT_WRITE)
 # define FLAGS (MAP_ANON | MAP_PRIVATE)
 
+// MACOS
+#ifdef __MACH__
+# define PS getpagesize()
+// LINUX
+#else
+# define PS sysconf(_SC_PAGESIZE)
+#endif
+
 typedef struct      s_alloc
 {
     short            free;
