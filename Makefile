@@ -10,7 +10,9 @@ PREP_INCS = -I$(INC)
 SRC = malloc.c \
 	  calloc.c \
 	  free.c \
+	  valloc.c \
 	  realloc.c \
+	  reallocf.c \
 	  show_alloc_mem.c \
 	  common.c \
 	  utils.c

@@ -12,13 +12,13 @@
 
 #include "ft_malloc.h"
 
-static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_size)
+static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t zone_size)
 {
     size_t  mmap_size;
     size_t  next_size;
     void    *ret;
 
-    mmap_size = get_multiple_of(type_size * (size <= SMALL ? 100 : 1) + HEADER, getpagesize());
+    mmap_size = get_multiple_of(zone_size, getpagesize());
     ret = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;
@@ -26,6 +26,7 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_
     (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
+    (*ptr)->zone = prev ? prev->zone + 1 : 0;
 
     next_size = mmap_size - (HEADER * 2 + size);
     if (!next_size)
@@ -37,26 +38,27 @@ static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t type_
     (*ptr)->next = (void *)*ptr + HEADER + size;
     (*ptr)->next->size = next_size;
     (*ptr)->next->free = 1;
+    (*ptr)->next->zone = (*ptr)->zone;
     (*ptr)->next->next = NULL;
     (*ptr)->next->prev = *ptr;
 
     return (void *)*ptr + HEADER;
 }
 
-static void                    *allocate(t_alloc **ptr, size_t size, size_t type)
+static void                    *allocate(t_alloc **ptr, size_t size, size_t zone_size)
 {
     t_alloc *tmp;
     t_alloc *new_alloc;
 
     if (!*ptr)
-        return new_zone(ptr, NULL, size, type);
+        return new_zone(ptr, NULL, size, zone_size);
 
     tmp = *ptr;
-    while (tmp->next && (!tmp->free || tmp->size < size + HEADER))
+    while (tmp->next && (!tmp->free || tmp->size < size + HEADER || tmp->zone != tmp->next->zone))
         tmp = tmp->next;
 
     if (!tmp->free || tmp->size < size + HEADER)
-        return new_zone(&tmp->next, tmp, size, type);
+        return new_zone(&tmp->next, tmp, size, zone_size);
 
     tmp->free = 0;
     if (tmp->size < size + HEADER * 2)
@@ -64,6 +66,7 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
 
     new_alloc = (void *)tmp + HEADER + size;
     new_alloc->size = tmp->size - (size + HEADER);
+    new_alloc->zone = tmp->zone;
     new_alloc->next = tmp->next;
     if (new_alloc->next)
         new_alloc->next->prev = new_alloc;
@@ -78,31 +81,30 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t type
 void                    *malloc(size_t size)
 {
     static int      initialization = 1;
-    static          pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     size_t          aligned_size;
-    struct rlimit   limits;
     void            *ret;
-
-    pthread_mutex_lock(&mutex);
+    /* struct rlimit   limits; */
 
     if (initialization)
     {
+        pthread_mutex_init(&g_mutex, NULL);
         g_state.tiny = NULL;
         g_state.small = NULL;
         g_state.large = NULL;
         initialization = 0;
     }
 
-    getrlimit(RLIMIT_DATA, &limits);
+    pthread_mutex_lock(&g_mutex);
 
+    /* getrlimit(RLIMIT_DATA, &limits); */
     aligned_size = get_multiple_of(size, 16);
     if (aligned_size <= TINY)
-        ret = allocate(&g_state.tiny, aligned_size, TINY);
+        ret = allocate(&g_state.tiny, aligned_size, TINY_ZONE);
     else if (aligned_size <= SMALL)
-        ret = allocate(&g_state.small, aligned_size, SMALL);
+        ret = allocate(&g_state.small, aligned_size, SMALL_ZONE);
     else
-        ret = allocate(&g_state.large, aligned_size, aligned_size);
+        ret = allocate(&g_state.large, aligned_size, aligned_size + HEADER);
 
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&g_mutex);
     return ret;
 }

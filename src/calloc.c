@@ -5,22 +5,15 @@ void    *calloc(size_t count, size_t size)
     size_t   value;
     char     *str;
     void     *ret;
+    size_t   i;
 
-    if (!count || !size)
-        return (NULL);
     value = count * size;
-    if (value > INT_MAX)
-        return (NULL);
     if (!(ret = malloc(value)))
         return (NULL);
     str = ret;
-    while (value)
-    {
-        *str = 0;
-        str++;
-        value--;
-    }
+    i = -1;
+    while (++i < value)
+        str[i] = 0;
     return ret;
 }
-
 

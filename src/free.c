@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/06/02 16:42:41 by kyazdani          #+#    #+#             */
-/*   Updated: 2019/10/04 18:25:34 by kyazdani         ###   ########.fr       */
+/*   Created: 2018/06/02 15:26:52 by kyazdani          #+#    #+#             */
+/*   Updated: 2019/10/05 14:44:48 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static void     defrag(t_alloc **elem)
 
     prev = (*elem)->prev;
     next = (*elem)->next;
-    while (prev && prev->free && prev_valid(*elem))
+    while (prev && prev->free && prev->zone == (*elem)->zone)
     {
         prev->size += HEADER + (*elem)->size;
         prev->next = (*elem)->next;
@@ -28,7 +28,7 @@ static void     defrag(t_alloc **elem)
         *elem = prev;
         prev = prev->prev;
     }
-    while (next && next->free && next_valid(*elem))
+    while (next && next->free && next->zone == (*elem)->zone)
     {
         (*elem)->next = next->next;
         (*elem)->size += HEADER + next->size;
@@ -38,37 +38,30 @@ static void     defrag(t_alloc **elem)
     }
 }
 
-static void    *get_zone(t_alloc *elem)
-{
-    t_alloc *tmp;
-
-    tmp = elem;
-    while (tmp->prev)
-        tmp = tmp->prev;
-    if (tmp == g_state.tiny)
-        return &g_state.tiny;
-    else if (tmp == g_state.small)
-        return &g_state.small;
-    else
-        return &g_state.large;
-}
-
 void free(void *ptr)
 {
     t_alloc     *elem;
-    t_alloc     **state;
+    t_alloc     *previous;
 
     if (!ptr) return;
 
     elem = get_header_from_addr(ptr);
     if (elem == NULL)
         return;
+
     elem->free = 1;
     defrag(&elem);
-    if ((elem->size + HEADER) % getpagesize() == 0)
+
+    if ((
+                !elem->prev && !elem->next)
+            || (!elem->prev && elem->next->zone != elem->zone)
+            || (!elem->next && elem->prev->zone != elem->zone)
+            || (elem->prev->zone != elem->zone && elem->next->zone != elem->zone
+               ))
     {
-        state = get_zone(elem);
-        *state = elem->prev ? elem->prev : elem->next;
+        previous = elem->prev;
+        if (previous)
+            previous->next = elem->next;
         if (munmap(elem, elem->size + HEADER) == -1)
             return;
     }

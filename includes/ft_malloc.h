@@ -21,20 +21,24 @@
 # include <pthread.h>
 # include <unistd.h>
 
-# define TINY 512
-# define SMALL 4096
 # define PROT (PROT_READ | PROT_WRITE)
 # define FLAGS (MAP_ANON | MAP_PRIVATE)
 
 typedef struct      s_alloc
 {
-    int             free;
+    short            free;
+    short            zone;
     size_t          size;
     struct s_alloc  *next;
     struct s_alloc  *prev;
 }                   t_alloc;
 
 # define HEADER sizeof(t_alloc)
+
+# define TINY 512
+# define SMALL 4096
+# define TINY_ZONE (TINY + HEADER) * 100
+# define SMALL_ZONE (SMALL + HEADER) * 100
 
 typedef struct      s_state
 {
@@ -44,6 +48,7 @@ typedef struct      s_state
 }                   t_state;
 
 t_state             g_state;
+pthread_mutex_t     g_mutex;
 
 void                free(void *ptr);
 void                *malloc(size_t size);
@@ -58,10 +63,7 @@ void                putaddr(void *ptr);
 
 t_alloc             *get_header_from_addr(void *ptr);
 size_t              get_multiple_of(size_t len, size_t alignment);
-int                 next_valid(t_alloc *alloc);
-int                 prev_valid(t_alloc *alloc);
 
 void                show_alloc_mem();
-void                show_alloc_mem_ex();
 
 #endif
