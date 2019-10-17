@@ -2,9 +2,11 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   realloc.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */ /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                    +:+ +:+         +:+     */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/06/02 16:42:55 by kyazdani          #+#    #+#             */ /*   Updated: 2019/10/04 15:55:01 by kyazdani         ###   ########.fr       */
+/*   Created: 2018/06/02 16:42:55 by kyazdani          #+#    #+#             */
+/*   Updated: 2019/10/04 15:55:01 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +71,8 @@ void    *realloc(void *ptr, size_t size)
 {
     void    *ret;
 
-    pthread_mutex_lock(&g_mutex);
+    /* pthread_mutex_lock(&g_mutex); */
     ret = actual_realloc(ptr, size);
-    pthread_mutex_unlock(&g_mutex);
+    /* pthread_mutex_unlock(&g_mutex); */
     return (ret);
 }
