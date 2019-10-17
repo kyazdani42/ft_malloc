@@ -12,35 +12,11 @@
 
 #include "ft_malloc.h"
 
-static void	copy_memory(void *to, void *from, size_t n)
-{
-	char		*dest;
-	char	    *src;
-
-    dest = to;
-    src = from;
-	while (n--)
-    {
-		*dest = *src;
-        dest++;
-        src++;
-    }
-}
-
-void	*actual_realloc(void *ptr, size_t size)
+static void	*_realloc(void *ptr, size_t size)
 {
     t_alloc     *header;
-    void        *new_value;
+    void        *new_ptr;
     size_t      aligned_size;
-
-    if (!ptr)
-        return malloc(size);
-
-    if (!size)
-    {
-        free(ptr);
-        return (malloc(0));
-    }
 
     header = get_header_from_addr(ptr);
     if (!header)
@@ -52,8 +28,9 @@ void	*actual_realloc(void *ptr, size_t size)
         return (ptr);
 
     // if the next bloc is free and the size of current + next is more or equals to the new size
-    if (header->next && header->next->free && header->next->zone == header->zone
-        && header->next->size + HEADER + header->size >= aligned_size)
+    if (header->next && header->next->free
+            && header->next->zone == header->zone
+            && header->next->size + HEADER + header->size >= aligned_size)
     {
         // |H|__|H|___|H|... > |H|_______|H|...
         header->size += HEADER + header->next->size;
@@ -61,18 +38,27 @@ void	*actual_realloc(void *ptr, size_t size)
         return (ptr);
     }
 
-    new_value = malloc(aligned_size);
-    copy_memory(new_value, ptr, header->size);
-    free(ptr);
-    return (new_value);
+    new_ptr = _malloc(aligned_size);
+    copy_memory(new_ptr, ptr, header->size);
+    _free(ptr);
+    return (new_ptr);
 }
 
 void    *realloc(void *ptr, size_t size)
 {
     void    *ret;
 
-    /* pthread_mutex_lock(&g_mutex); */
-    ret = actual_realloc(ptr, size);
-    /* pthread_mutex_unlock(&g_mutex); */
+    if (!ptr)
+        return malloc(size);
+
+    if (!size)
+    {
+        free(ptr);
+        return (malloc(0));
+    }
+
+    pthread_mutex_lock(&g_mutex);
+    ret = _realloc(ptr, size);
+    pthread_mutex_unlock(&g_mutex);
     return (ret);
 }

@@ -34,3 +34,18 @@ t_alloc  *get_header_from_addr(void *ptr)
     return (NULL);
 }
 
+
+void	copy_memory(void *to, void *from, size_t n)
+{
+	char		*dest;
+	char	    *src;
+
+    dest = to;
+    src = from;
+	while (n--)
+    {
+		*dest = *src;
+        dest++;
+        src++;
+    }
+}

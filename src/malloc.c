@@ -78,10 +78,22 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
     return (void *)tmp + HEADER;
 }
 
+void                    *_malloc(size_t size)
+{
+    size_t  aligned_size;
+
+    aligned_size = get_multiple_of(size, 16);
+    if (aligned_size <= TINY)
+        return (allocate(&g_state.tiny, aligned_size, TINY_ZONE));
+    else if (aligned_size <= SMALL)
+        return (allocate(&g_state.small, aligned_size, SMALL_ZONE));
+    else
+        return (allocate(&g_state.large, aligned_size, aligned_size + HEADER));
+}
+
 void                    *malloc(size_t size)
 {
     static int      initialization = 1;
-    size_t          aligned_size;
     void            *ret;
 
     if (initialization)
@@ -94,15 +106,7 @@ void                    *malloc(size_t size)
     }
 
     pthread_mutex_lock(&g_mutex);
-
-    aligned_size = get_multiple_of(size, 16);
-    if (aligned_size <= TINY)
-        ret = allocate(&g_state.tiny, aligned_size, TINY_ZONE);
-    else if (aligned_size <= SMALL)
-        ret = allocate(&g_state.small, aligned_size, SMALL_ZONE);
-    else
-        ret = allocate(&g_state.large, aligned_size, aligned_size + HEADER);
-
+    ret = _malloc(size);
     pthread_mutex_unlock(&g_mutex);
     return ret;
 }

@@ -55,7 +55,7 @@ static t_alloc  **get_zone(t_alloc *elem)
         return (NULL);
 }
 
-static void  actual_free(void *ptr)
+void  _free(void *ptr)
 {
     t_alloc     *elem;
     t_alloc     *previous;
@@ -95,7 +95,7 @@ static void  actual_free(void *ptr)
 void free(void *ptr)
 {
     pthread_mutex_lock(&g_mutex);
-    actual_free(ptr);
+    _free(ptr);
     pthread_mutex_unlock(&g_mutex);
 }
 
