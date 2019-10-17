@@ -34,17 +34,16 @@
 
 typedef struct      s_alloc
 {
-    short            free;
-    short            zone;
+    int             free;
+    int             zone;
     size_t          size;
     struct s_alloc  *next;
-    struct s_alloc  *prev;
 }                   t_alloc;
 
 # define HEADER sizeof(t_alloc)
 
-# define TINY 512 - HEADER
-# define SMALL 4096 - HEADER
+# define TINY 512
+# define SMALL 4096
 # define TINY_ZONE (TINY) * 100
 # define SMALL_ZONE (SMALL) * 100
 

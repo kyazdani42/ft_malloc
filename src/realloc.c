@@ -69,5 +69,6 @@ void    *realloc(void *ptr, size_t size)
     pthread_mutex_lock(&g_mutex);
     ret = _realloc(ptr, size);
     pthread_mutex_unlock(&g_mutex);
+    show_alloc_mem();
     return (ret);
 }
