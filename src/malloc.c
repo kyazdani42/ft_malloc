@@ -16,6 +16,7 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
 {
     size_t      mmap_size;
     size_t      next_size;
+    t_alloc     *free_zone;
     t_alloc     *ret;
 
     mmap_size = get_multiple_of(zone_size, PS);
@@ -33,22 +34,21 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
         return ret;
     }
 
-    ret->next = (void *)ret + HEADER + size;
-    ret->next->size = next_size;
-    ret->next->zone = ret->zone;
-    ret->next->free = 1;
-    ret->next->next = NULL;
+    free_zone = (void *)ret + HEADER + size;
+    free_zone->size = next_size;
+    free_zone->zone = ret->zone;
+    free_zone->free = 1;
+    free_zone->next = NULL;
 
+    ret->next = free_zone;
     return ret;
 }
 
-#include <stdio.h>
 static void                    *allocate(t_alloc **ptr, size_t size, size_t zone_size)
 {
     t_alloc     *alloc;
     t_alloc     *new;
 
-    show_alloc_mem();
     if (!*ptr)
     {
         *ptr = new_zone(0, size, zone_size);
@@ -65,7 +65,6 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
         alloc->next = new;
         return (void *)new + HEADER;
     }
-    putstr("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 
     alloc->free = 0;
     if (alloc->size < size + HEADER * 2)
@@ -80,9 +79,6 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
     alloc->size = size;
     alloc->next = new;
 
-    show_alloc_mem();
-    putstr("\n\n\n");
-    usleep(500000);
     return (void *)alloc + HEADER;
 }
 

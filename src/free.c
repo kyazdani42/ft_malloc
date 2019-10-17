@@ -76,6 +76,43 @@ inline static int   should_munmap(t_alloc *elem, t_alloc *prev)
         (prev->zone != elem->zone && next->zone != elem->zone);
 }
 
+t_alloc  *get_header(void *ptr, t_alloc **prev)
+{
+    t_alloc *tmp;
+
+    tmp = g_state.large;
+    *prev = NULL;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        *prev = tmp;
+        tmp = tmp->next;
+    }
+    tmp = g_state.small;
+    *prev = NULL;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        *prev = tmp;
+        tmp = tmp->next;
+    }
+    tmp = g_state.tiny;
+    *prev = NULL;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        *prev = tmp;
+        tmp = tmp->next;
+    }
+    return (NULL);
+}
+
+
+
+
 void  _free(void *ptr)
 {
     t_alloc     *elem;
@@ -85,17 +122,12 @@ void  _free(void *ptr)
     if (!ptr)
         return;
 
-    if (!(elem = get_header_from_addr(ptr)))
+    if (!(elem = get_header(ptr, &prev)))
         return;
 
     elem->free = 1;
     if (!(zone = get_zone(elem)))
         return;
-    prev = *zone;
-    while (prev->next && prev->next != elem)
-        prev = prev->next;
-    if (prev->next != elem)
-        prev = NULL;
 
     defrag(&elem, &prev);
     if (should_munmap(elem, prev))
@@ -114,6 +146,5 @@ void free(void *ptr)
     pthread_mutex_lock(&g_mutex);
     _free(ptr);
     pthread_mutex_unlock(&g_mutex);
-    putstr("Into free\n");
 }
 
