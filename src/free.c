@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-static void     defrag(t_alloc **elem)
+inline static void     defrag(t_alloc **elem)
 {
     t_alloc *prev;
     t_alloc *next;
@@ -55,32 +55,31 @@ static t_alloc  **get_zone(t_alloc *elem)
         return (NULL);
 }
 
+inline static int   should_munmap(t_alloc *elem)
+{
+    return (!elem->prev && !elem->next) ||
+        (!elem->prev && elem->next->zone != elem->zone) ||
+        (!elem->next && elem->prev->zone != elem->zone) ||
+        (elem->prev->zone != elem->zone && elem->next->zone != elem->zone);
+}
+
 void  _free(void *ptr)
 {
     t_alloc     *elem;
-    t_alloc     *previous;
     t_alloc     **zone;
 
     if (!ptr)
         return;
 
-    elem = get_header_from_addr(ptr);
-    if (elem == NULL)
+    if (!(elem = get_header_from_addr(ptr)))
         return;
 
     elem->free = 1;
     defrag(&elem);
-
-    if ((
-                !elem->prev && !elem->next)
-            || (!elem->prev && elem->next->zone != elem->zone)
-            || (!elem->next && elem->prev->zone != elem->zone)
-            || (elem->prev->zone != elem->zone && elem->next->zone != elem->zone
-               ))
+    if (should_munmap(elem))
     {
-        previous = elem->prev;
-        if (previous)
-            previous->next = elem->next;
+        if (elem->prev)
+            elem->prev->next = elem->next;
         else
         {
             if (!(zone = get_zone(elem)))

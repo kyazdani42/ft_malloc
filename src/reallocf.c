@@ -1,23 +1,42 @@
 #include "ft_malloc.h"
 
-void    *_reallocf(void *ptr, size_t size)
+inline static int   should_resize(t_alloc *header, size_t size)
+{
+    return  header->next
+        && header->next->free
+        && header->next->zone == header->zone
+        && header->next->size + HEADER + header->size >= size;
+}
+
+static void	*_reallocf(void *ptr, size_t size)
 {
     t_alloc     *header;
-    void        *new_value;
+    void        *new_ptr;
     size_t      aligned_size;
 
-    header = get_header_from_addr(ptr);
-    if (!header)
+    if (!(header = get_header_from_addr(ptr)))
         return (ptr);
 
     aligned_size = get_multiple_of(size, 16);
 
     if (aligned_size <= header->size)
         return (ptr);
-    new_value = _malloc(aligned_size);
-    copy_memory(&new_value, ptr, header->size);
+
+    if (should_resize(header, aligned_size))
+    {
+        header->size += HEADER + header->next->size;
+        header->next = header->next->next;
+        return (ptr);
+    }
+
+    if (!(new_ptr = _malloc(aligned_size)))
+    {
+        free(ptr);
+        return (NULL);
+    }
+    copy_memory(new_ptr, ptr, header->size);
     _free(ptr);
-    return (new_value);
+    return (new_ptr);
 }
 
 void    *reallocf(void *ptr, size_t size)

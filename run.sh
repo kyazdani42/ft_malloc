@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 export DYLD_LIBRARY_PATH=.
 export DYLD_INSERT_LIBRARIES=$PWD/libft_malloc.so

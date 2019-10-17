@@ -97,15 +97,17 @@ void                    *malloc(size_t size)
     void            *ret;
 
     if (initialization)
-    {
         pthread_mutex_init(&g_mutex, NULL);
+
+    pthread_mutex_lock(&g_mutex);
+    if (initialization)
+    {
         g_state.tiny = NULL;
         g_state.small = NULL;
         g_state.large = NULL;
         initialization = 0;
     }
 
-    pthread_mutex_lock(&g_mutex);
     ret = _malloc(size);
     pthread_mutex_unlock(&g_mutex);
     return ret;

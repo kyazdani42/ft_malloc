@@ -49,3 +49,4 @@ void	copy_memory(void *to, void *from, size_t n)
         src++;
     }
 }
+

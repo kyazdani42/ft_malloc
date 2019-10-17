@@ -12,14 +12,21 @@
 
 #include "ft_malloc.h"
 
+inline static int   should_resize(t_alloc *header, size_t size)
+{
+    return  header->next
+        && header->next->free
+        && header->next->zone == header->zone
+        && header->next->size + HEADER + header->size >= size;
+}
+
 static void	*_realloc(void *ptr, size_t size)
 {
     t_alloc     *header;
     void        *new_ptr;
     size_t      aligned_size;
 
-    header = get_header_from_addr(ptr);
-    if (!header)
+    if (!(header = get_header_from_addr(ptr)))
         return (ptr);
 
     aligned_size = get_multiple_of(size, 16);
@@ -27,18 +34,15 @@ static void	*_realloc(void *ptr, size_t size)
     if (aligned_size <= header->size)
         return (ptr);
 
-    // if the next bloc is free and the size of current + next is more or equals to the new size
-    if (header->next && header->next->free
-            && header->next->zone == header->zone
-            && header->next->size + HEADER + header->size >= aligned_size)
+    if (should_resize(header, aligned_size))
     {
-        // |H|__|H|___|H|... > |H|_______|H|...
         header->size += HEADER + header->next->size;
         header->next = header->next->next;
         return (ptr);
     }
 
-    new_ptr = _malloc(aligned_size);
+    if (!(new_ptr = _malloc(aligned_size)))
+        return (ptr);
     copy_memory(new_ptr, ptr, header->size);
     _free(ptr);
     return (new_ptr);
