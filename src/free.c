@@ -18,16 +18,17 @@ inline static void     defrag(t_alloc **elem)
     t_alloc *next;
 
     prev = (*elem)->prev;
-    next = (*elem)->next;
     while (prev && prev->free && prev->zone == (*elem)->zone)
     {
         prev->size += HEADER + (*elem)->size;
         prev->next = (*elem)->next;
-        if (prev->next)
-            prev->next->prev = prev;
+        next = prev->next;
+        if (next)
+            next->prev = prev;
         *elem = prev;
         prev = prev->prev;
     }
+    next = (*elem)->next;
     while (next && next->free && next->zone == (*elem)->zone)
     {
         (*elem)->next = next->next;
@@ -36,6 +37,7 @@ inline static void     defrag(t_alloc **elem)
         if (next)
             next->prev = *elem;
     }
+    show_alloc_mem();
 }
 
 static t_alloc  **get_zone(t_alloc *elem)
@@ -57,15 +59,21 @@ static t_alloc  **get_zone(t_alloc *elem)
 
 inline static int   should_munmap(t_alloc *elem)
 {
-    return (!elem->prev && !elem->next) ||
-        (!elem->prev && elem->next->zone != elem->zone) ||
-        (!elem->next && elem->prev->zone != elem->zone) ||
-        (elem->prev->zone != elem->zone && elem->next->zone != elem->zone);
+    t_alloc     *prev;
+    t_alloc     *next;
+
+    prev = elem->prev;
+    next = elem->next;
+    return (!prev && !next) ||
+        (!prev && next->zone != elem->zone) ||
+        (!next && prev->zone != elem->zone) ||
+        (prev->zone != elem->zone && next->zone != elem->zone);
 }
 
 void  _free(void *ptr)
 {
     t_alloc     *elem;
+    t_alloc     *prev;
     t_alloc     **zone;
 
     if (!ptr)
@@ -78,8 +86,9 @@ void  _free(void *ptr)
     defrag(&elem);
     if (should_munmap(elem))
     {
-        if (elem->prev)
-            elem->prev->next = elem->next;
+        prev = elem->prev;
+        if (prev)
+            prev->next = elem->next;
         else
         {
             if (!(zone = get_zone(elem)))

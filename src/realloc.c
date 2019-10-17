@@ -14,15 +14,19 @@
 
 inline static int   should_resize(t_alloc *header, size_t size)
 {
-    return  header->next
-        && header->next->free
-        && header->next->zone == header->zone
-        && header->next->size + HEADER + header->size >= size;
+    t_alloc     *next;
+
+    next = header->next;
+    return  next
+        && next->free
+        && next->zone == header->zone
+        && next->size + HEADER + header->size >= size;
 }
 
 static void	*_realloc(void *ptr, size_t size)
 {
     t_alloc     *header;
+    t_alloc     *next;
     void        *new_ptr;
     size_t      aligned_size;
 
@@ -36,8 +40,9 @@ static void	*_realloc(void *ptr, size_t size)
 
     if (should_resize(header, aligned_size))
     {
-        header->size += HEADER + header->next->size;
-        header->next = header->next->next;
+        next = header->next;
+        header->size += HEADER + next->size;
+        header->next = next->next;
         return (ptr);
     }
 

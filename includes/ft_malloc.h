@@ -43,10 +43,10 @@ typedef struct      s_alloc
 
 # define HEADER sizeof(t_alloc)
 
-# define TINY 512
-# define SMALL 4096
-# define TINY_ZONE (TINY + HEADER) * 100
-# define SMALL_ZONE (SMALL + HEADER) * 100
+# define TINY 512 - HEADER
+# define SMALL 4096 - HEADER
+# define TINY_ZONE (TINY) * 100
+# define SMALL_ZONE (SMALL) * 100
 
 typedef struct      s_state
 {

@@ -14,47 +14,52 @@
 
 static void    *new_zone(t_alloc **ptr, t_alloc *prev, size_t size, size_t zone_size)
 {
-    size_t  mmap_size;
-    size_t  next_size;
-    void    *ret;
+    size_t      mmap_size;
+    size_t      next_size;
+    void        *ret;
+    t_alloc     *next;
 
     mmap_size = get_multiple_of(zone_size, PS);
     ret = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;
+
     *ptr = ret;
     (*ptr)->prev = prev;
     (*ptr)->size = size;
     (*ptr)->free = 0;
     (*ptr)->zone = prev ? prev->zone + 1 : 0;
+    if (prev)
+        prev->next = *ptr;
 
-    next_size = mmap_size - (HEADER * 2 + size);
-    if (!next_size)
+    if (!(next_size = mmap_size - (HEADER * 2 + size)))
     {
         (*ptr)->next = NULL;
         return (void *)*ptr + HEADER;
     }
 
     (*ptr)->next = (void *)*ptr + HEADER + size;
-    (*ptr)->next->size = next_size;
-    (*ptr)->next->free = 1;
-    (*ptr)->next->zone = (*ptr)->zone;
-    (*ptr)->next->next = NULL;
-    (*ptr)->next->prev = *ptr;
+    next = (*ptr)->next;
+    next->size = next_size;
+    next->zone = (*ptr)->zone;
+    next->free = 1;
+    next->prev = *ptr;
+    next->next = NULL;
 
     return (void *)*ptr + HEADER;
 }
 
 static void                    *allocate(t_alloc **ptr, size_t size, size_t zone_size)
 {
-    t_alloc *tmp;
-    t_alloc *new_alloc;
+    t_alloc     *tmp;
+    t_alloc     *next;
+    t_alloc     *new_alloc;
 
     if (!*ptr)
         return new_zone(ptr, NULL, size, zone_size);
 
     tmp = *ptr;
-    while (tmp->next && (!tmp->free || tmp->size < size + HEADER || tmp->zone != tmp->next->zone))
+    while (tmp->next && (!tmp->free || tmp->size < size + HEADER))
         tmp = tmp->next;
 
     if (!tmp->free || tmp->size < size + HEADER)
@@ -68,8 +73,9 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
     new_alloc->size = tmp->size - (size + HEADER);
     new_alloc->zone = tmp->zone;
     new_alloc->next = tmp->next;
-    if (new_alloc->next)
-        new_alloc->next->prev = new_alloc;
+    next = new_alloc->next;
+    if (next)
+        next->prev = new_alloc;
     new_alloc->prev = tmp;
     new_alloc->free = 1;
 

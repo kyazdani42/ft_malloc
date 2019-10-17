@@ -11,6 +11,7 @@ inline static int   should_resize(t_alloc *header, size_t size)
 static void	*_reallocf(void *ptr, size_t size)
 {
     t_alloc     *header;
+    t_alloc     *next;
     void        *new_ptr;
     size_t      aligned_size;
 
@@ -24,16 +25,17 @@ static void	*_reallocf(void *ptr, size_t size)
 
     if (should_resize(header, aligned_size))
     {
-        header->size += HEADER + header->next->size;
-        header->next = header->next->next;
+        next = header->next;
+        header->size += HEADER + next->size;
+        header->next = next->next;
         return (ptr);
     }
-
     if (!(new_ptr = _malloc(aligned_size)))
     {
         free(ptr);
         return (NULL);
     }
+
     copy_memory(new_ptr, ptr, header->size);
     _free(ptr);
     return (new_ptr);
