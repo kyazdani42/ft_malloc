@@ -20,7 +20,7 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
     t_alloc     *ret;
 
     mmap_size = get_multiple_of(zone_size, PS);
-    ret = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
+    ret = (t_alloc *)mmap(0, mmap_size, PROT, FLAGS, -1, 0);
     if (ret == MAP_FAILED)
         return NULL;
 
@@ -36,7 +36,7 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
 
     free_zone = (void *)ret + HEADER + size;
     free_zone->size = next_size;
-    free_zone->zone = ret->zone;
+    free_zone->zone = zone_index;
     free_zone->free = 1;
     free_zone->next = NULL;
 
@@ -67,18 +67,17 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
     }
 
     alloc->free = 0;
-    if (alloc->size < size + HEADER * 2)
+    if (alloc->size < (size + HEADER * 2 + 16))
         return (void *)alloc + HEADER;
+
 
     new = (void *)alloc + HEADER + size;
     new->size = alloc->size - (size + HEADER);
+    alloc->size = size;
     new->zone = alloc->zone;
     new->next = alloc->next;
     new->free = 1;
-
-    alloc->size = size;
     alloc->next = new;
-
     return (void *)alloc + HEADER;
 }
 

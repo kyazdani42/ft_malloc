@@ -54,8 +54,8 @@ void    *reallocf(void *ptr, size_t size)
         return (malloc(0));
     }
 
-    pthread_mutex_lock(&g_mutex);
+    /* pthread_mutex_lock(&g_mutex); */
     ret = _reallocf(ptr, size);
-    pthread_mutex_unlock(&g_mutex);
+    /* pthread_mutex_unlock(&g_mutex); */
     return (ret);
 }

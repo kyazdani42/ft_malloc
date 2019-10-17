@@ -40,7 +40,7 @@ typedef struct      s_alloc
     struct s_alloc  *next;
 }                   t_alloc;
 
-# define HEADER sizeof(t_alloc)
+# define HEADER get_multiple_of(sizeof(t_alloc), 16)
 
 # define TINY 512
 # define SMALL 4096
