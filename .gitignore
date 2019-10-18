@@ -5,3 +5,4 @@ libft_malloc*
 .vscode
 *.swp
 tests/run_tests
+.clangd

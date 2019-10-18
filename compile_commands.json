@@ -1,0 +1,130 @@
+[
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/malloc.c",
+   "-o",
+   "obj/malloc.o"
+  ],
+  "file": "src/malloc.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/calloc.c",
+   "-o",
+   "obj/calloc.o"
+  ],
+  "file": "src/calloc.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/free.c",
+   "-o",
+   "obj/free.o"
+  ],
+  "file": "src/free.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/realloc.c",
+   "-o",
+   "obj/realloc.o"
+  ],
+  "file": "src/realloc.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/reallocf.c",
+   "-o",
+   "obj/reallocf.o"
+  ],
+  "file": "src/reallocf.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/reallocutils.c",
+   "-o",
+   "obj/reallocutils.o"
+  ],
+  "file": "src/reallocutils.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/show_alloc_mem.c",
+   "-o",
+   "obj/show_alloc_mem.o"
+  ],
+  "file": "src/show_alloc_mem.c"
+ },
+ {
+  "directory": "/home/kiyan/Document/42/ft_malloc",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fPIC",
+   "-Iincludes/",
+   "-c",
+   "src/utils.c",
+   "-o",
+   "obj/utils.o"
+  ],
+  "file": "src/utils.c"
+ }
+]
