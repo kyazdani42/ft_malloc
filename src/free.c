@@ -120,8 +120,6 @@ t_alloc  *get_header(void *ptr, t_alloc **prev)
     return (NULL);
 }
 
-
-
 void  _free(void *ptr)
 {
     t_alloc     *elem;
@@ -140,8 +138,6 @@ void  _free(void *ptr)
     elem->free = 1;
 
     defrag(&elem, prev);
-    // this is cost expensive...
-    // consider putting a prev element back
     prev = get_prev(*zone, elem);
     if (should_munmap(elem, prev))
     {

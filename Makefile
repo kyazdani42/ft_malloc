@@ -12,6 +12,7 @@ SRC = malloc.c \
 	  free.c \
 	  realloc.c \
 	  reallocf.c \
+	  reallocutils.c \
 	  show_alloc_mem.c \
 	  common.c \
 	  utils.c
