@@ -7,11 +7,15 @@ void    *calloc(size_t count, size_t size)
     void     *ret;
     size_t   aligned_value;
 
-    value = count * size;
-    if (!(ret = malloc(value)))
-        return (NULL);
-
     pthread_mutex_lock(&g_mutex);
+
+    value = count * size;
+    if (!(ret = _malloc(value)))
+    {
+        pthread_mutex_unlock(&g_mutex);
+        return (NULL);
+    }
+
     str = ret;
     aligned_value = get_multiple_of(value, 16);
     while (aligned_value)
