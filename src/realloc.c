@@ -22,14 +22,13 @@ inline static void	*_realloc(void *ptr, size_t size)
         return (NULL);
 
     size = get_multiple_of(size, 16);
-
     if (size <= header->size)
         return (ptr);
 
     next = header->next;
-    if (should_resize(header, next, size))
+    if (should_resize(header, next, size) && check_new_size(header, size))
     {
-        resize_alloc(header, next, size);
+        resize_alloc(&header, &next, size);
         return (ptr);
     }
 
@@ -45,23 +44,18 @@ void                *realloc(void *ptr, size_t size)
 {
     void    *ret;
 
-    pthread_mutex_lock(&g_mutex);
     if (!ptr)
-    {
-        ret = _malloc(size);
-        pthread_mutex_unlock(&g_mutex);
-        return (ret);
-    }
+        return (malloc(size));
 
     if (!size)
     {
-        _free(ptr);
-        ret = _malloc(0);
-        pthread_mutex_unlock(&g_mutex);
-        return (ret);
+        free(ptr);
+        return (malloc(0));
     }
 
+    pthread_mutex_lock(&g_mutex);
     ret = _realloc(ptr, size);
     pthread_mutex_unlock(&g_mutex);
+
     return (ret);
 }

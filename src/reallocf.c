@@ -18,17 +18,17 @@ inline static void	*_reallocf(void *ptr, size_t size)
     t_alloc     *next;
     void        *new_ptr;
 
-    size = get_multiple_of(size, 16);
     if (!(header = get_header_from_addr(ptr)))
         return (NULL);
 
+    size = get_multiple_of(size, 16);
     if (size <= header->size)
         return (ptr);
 
     next = header->next;
-    if (should_resize(header, next, size))
+    if (should_resize(header, next, size) && check_new_size(header, size))
     {
-        resize_alloc(header, next, size);
+        resize_alloc(&header, &next, size);
         return (ptr);
     }
     if (!(new_ptr = _malloc(size)))

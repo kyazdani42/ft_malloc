@@ -12,6 +12,16 @@
 
 #include "ft_malloc.h"
 
+int   check_new_size(t_alloc *cur, size_t size)
+{
+
+    if (cur->size <= TINY && size > TINY)
+        return (0);
+    if (cur->size <= SMALL && (size > SMALL || size <= TINY))
+        return (0);
+    return (1);
+}
+
 int   should_resize(t_alloc *cur, t_alloc *next, size_t size)
 {
     return  next
@@ -20,25 +30,25 @@ int   should_resize(t_alloc *cur, t_alloc *next, size_t size)
         && cur->size + HEADER + next->size >= size;
 }
 
-void    resize_alloc(t_alloc *header, t_alloc *next, size_t size)
+void    resize_alloc(t_alloc **header, t_alloc **next, size_t size)
 {
         size_t      next_size;
 
-        next_size = next->size - (size - header->size);
+        next_size = (*next)->size - (size - (*header)->size);
         if (next_size < (HEADER + 16))
         {
-            header->size += HEADER + next->size;
-            header->next = next->next;
+            (*header)->size += HEADER + (*next)->size;
+            (*header)->next = (*next)->next;
         }
         else
         {
-            header->size = size;
-            header->next = (void *)header + HEADER + size;
-            header->next->next = next->next;
-            next = header->next;
-            next->free = 1;
-            next->zone = header->zone;
-            next->size = next_size;
+            (*header)->size = size;
+            (*header)->next = (void *)*header + HEADER + size;
+            (*header)->next->next = (*next)->next;
+            *next = (*header)->next;
+            (*next)->free = 1;
+            (*next)->zone = (*header)->zone;
+            (*next)->size = next_size;
         }
 }
 

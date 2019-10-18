@@ -25,7 +25,7 @@ OBJ_PATH = obj
 OBJ = $(addprefix $(OBJ_PATH)/, $(SRC:%.c=%.o))
 
 FLAGS = -Wall -Wextra -Werror -fPIC
-ifeq ($(DEBUG),)
+ifneq ($(DEBUG),)
 	FLAGS += -g3
 endif
 

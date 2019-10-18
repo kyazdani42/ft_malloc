@@ -66,15 +66,16 @@ void                *calloc(size_t count, size_t size);
 void                *realloc(void *ptr, size_t size);
 void                *reallocf(void *ptr, size_t size);
 int                 should_resize(t_alloc *cur, t_alloc *next, size_t size);
-void                resize_alloc(t_alloc *header, t_alloc *next, size_t size);
+void                resize_alloc(t_alloc **header, t_alloc **next, size_t size);
+int                 check_new_size(t_alloc *cur, size_t size);
+t_alloc             *get_header_from_addr(void *ptr);
+void                copy_memory(void *to, void *from, size_t n);
 
 void                putstr(char *str);
 void                putnbr(size_t nb);
 void                putaddr(void *ptr);
-
-t_alloc             *get_header_from_addr(void *ptr);
 size_t              get_multiple_of(size_t len, size_t alignment);
-void                copy_memory(void *to, void *from, size_t n);
+
 
 void                show_alloc_mem();
 
