@@ -27,13 +27,11 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
     ret->size = size;
     ret->free = 0;
     ret->zone = zone_index;
-
     if (!(next_size = mmap_size - (HEADER * 2 + size)))
     {
         ret->next = NULL;
         return ret;
     }
-
     free_zone = (void *)ret + HEADER + size;
     free_zone->size = next_size;
     free_zone->zone = zone_index;
@@ -42,6 +40,18 @@ static void    *new_zone(int zone_index, size_t size, size_t zone_size)
 
     ret->next = free_zone;
     return ret;
+}
+
+inline static void              create_free_block(t_alloc **cur, t_alloc **new, size_t size)
+{
+    (*new)->free = 1;
+    (*new)->zone = (*cur)->zone;
+
+    (*new)->next = (*cur)->next;
+    (*cur)->next = *new;
+
+    (*new)->size = (*cur)->size - (HEADER + size);
+    (*cur)->size = size;
 }
 
 static void                    *allocate(t_alloc **ptr, size_t size, size_t zone_size)
@@ -65,19 +75,12 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
         alloc->next = new;
         return (void *)new + HEADER;
     }
-
     alloc->free = 0;
     if (alloc->size < (size + HEADER * 2 + 16))
         return (void *)alloc + HEADER;
 
-
     new = (void *)alloc + HEADER + size;
-    new->size = alloc->size - (size + HEADER);
-    alloc->size = size;
-    new->zone = alloc->zone;
-    new->next = alloc->next;
-    new->free = 1;
-    alloc->next = new;
+    create_free_block(&alloc, &new, size);
     return (void *)alloc + HEADER;
 }
 

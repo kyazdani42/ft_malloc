@@ -20,7 +20,7 @@ inline static void	*_reallocf(void *ptr, size_t size)
 
     size = get_multiple_of(size, 16);
     if (!(header = get_header_from_addr(ptr)))
-        return (ptr);
+        return (NULL);
 
     if (size <= header->size)
         return (ptr);
@@ -33,7 +33,7 @@ inline static void	*_reallocf(void *ptr, size_t size)
     }
     if (!(new_ptr = _malloc(size)))
     {
-        free(ptr);
+        _free(ptr);
         return (NULL);
     }
     copy_memory(new_ptr, ptr, header->size);

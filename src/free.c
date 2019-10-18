@@ -30,35 +30,6 @@ inline static void     defrag(t_alloc **e, t_alloc *prev) {
     }
 }
 
-inline static t_alloc  **get_zone(t_alloc *elem)
-{
-    t_alloc *tmp;
-
-    tmp = g_state.tiny;
-    while (tmp && tmp->next)
-    {
-        if (tmp == elem)
-            return &g_state.tiny;
-        tmp = tmp->next;
-    }
-    tmp = g_state.small;
-    while (tmp && tmp->next)
-    {
-        if (tmp == elem)
-            return &g_state.small;
-        tmp = tmp->next;
-    }
-    tmp = g_state.large;
-    while (tmp && tmp->next)
-    {
-        if (tmp == elem)
-            return &g_state.large;
-        tmp = tmp->next;
-    }
-
-    return (NULL);
-}
-
 inline static int   should_munmap(t_alloc *elem, t_alloc *prev)
 {
     t_alloc     *next;
@@ -85,67 +56,55 @@ t_alloc    *get_prev(t_alloc *zone, t_alloc *elem)
     return (tmp);
 }
 
-t_alloc  *get_header(void *ptr, t_alloc **prev)
+inline static int    loop_zone(void *ptr, t_alloc *zone, t_alloc **cur, t_alloc **prev)
 {
-    t_alloc *tmp;
+    *cur = zone;
+    *prev = NULL;
+    while (*cur)
+    {
+        if ((void *)*cur + HEADER == ptr)
+            return (1);
+        *prev = *cur;
+        *cur = (*cur)->next;
+    }
+    *prev = NULL;
+    *cur = NULL;
+    return (0);
+}
 
-    tmp = g_state.large;
-    *prev = NULL;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (tmp);
-        *prev = tmp;
-        tmp = tmp->next;
-    }
-    tmp = g_state.small;
-    *prev = NULL;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (tmp);
-        *prev = tmp;
-        tmp = tmp->next;
-    }
-    tmp = g_state.tiny;
-    *prev = NULL;
-    while (tmp)
-    {
-        if ((void *)tmp + HEADER == ptr)
-            return (tmp);
-        *prev = tmp;
-        tmp = tmp->next;
-    }
-    *prev = NULL;
+inline static t_alloc  **set_zone_and_elements(void *ptr, t_alloc **cur, t_alloc **prev)
+{
+    if (loop_zone(ptr, g_state.large, cur, prev))
+        return &g_state.large;
+    if (loop_zone(ptr, g_state.small, cur, prev))
+        return &g_state.small;
+    if (loop_zone(ptr, g_state.tiny, cur, prev))
+        return &g_state.tiny;
     return (NULL);
 }
 
 void  _free(void *ptr)
 {
-    t_alloc     *elem;
+    t_alloc     *cur;
     t_alloc     *prev;
     t_alloc     **zone;
 
     if (!ptr)
         return;
 
-    if (!(elem = get_header(ptr, &prev)))
+    if (!(zone = set_zone_and_elements(ptr, &cur, &prev)))
         return;
 
-    if (!(zone = get_zone(elem)))
-        return;
-
-    elem->free = 1;
-
-    defrag(&elem, prev);
-    prev = get_prev(*zone, elem);
-    if (should_munmap(elem, prev))
+    cur->free = 1;
+    defrag(&cur, prev);
+    prev = get_prev(*zone, cur);
+    if (should_munmap(cur, prev))
     {
         if (!prev)
-            *zone = elem->next;
+            *zone = cur->next;
         else
-            prev->next = elem->next;
-        if (munmap(elem, elem->size + HEADER) == -1)
+            prev->next = cur->next;
+        if (munmap(cur, cur->size + HEADER) == -1)
             return;
     }
 }

@@ -41,3 +41,46 @@ void    resize_alloc(t_alloc *header, t_alloc *next, size_t size)
             next->size = next_size;
         }
 }
+
+t_alloc  *get_header_from_addr(void *ptr)
+{
+    t_alloc *tmp;
+
+    tmp = g_state.large;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        tmp = tmp->next;
+    }
+    tmp = g_state.small;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        tmp = tmp->next;
+    }
+    tmp = g_state.tiny;
+    while (tmp)
+    {
+        if ((void *)tmp + HEADER == ptr)
+            return (tmp);
+        tmp = tmp->next;
+    }
+    return (NULL);
+}
+
+void	copy_memory(void *to, void *from, size_t n)
+{
+	char		*dest;
+	char	    *src;
+
+    dest = to;
+    src = from;
+	while (n--)
+    {
+		*dest = *src;
+        dest++;
+        src++;
+    }
+}

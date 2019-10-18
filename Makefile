@@ -14,7 +14,6 @@ SRC = malloc.c \
 	  reallocf.c \
 	  reallocutils.c \
 	  show_alloc_mem.c \
-	  common.c \
 	  utils.c
 
 SRC_PATH = src
@@ -26,6 +25,9 @@ OBJ_PATH = obj
 OBJ = $(addprefix $(OBJ_PATH)/, $(SRC:%.c=%.o))
 
 FLAGS = -Wall -Wextra -Werror -fPIC
+ifeq ($(DEBUG),)
+	FLAGS += -g3
+endif
 
 .PHONY: all clean fclean re
 

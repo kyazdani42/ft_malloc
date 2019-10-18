@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/10/18 15:21:46 by kyazdani          #+#    #+#             */
+/*   Updated: 2019/10/18 15:21:49 by kyazdani         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_malloc.h"
 
 static int      get_addr_length(long long addr, int base)
@@ -75,3 +87,8 @@ void            putstr(char *str)
     write(1, str, len);
 }
 
+size_t    get_multiple_of(size_t len, size_t alignment) {
+    if (len % alignment == 0)
+        return len != 0 ? len : alignment;
+    return alignment * (len / alignment + 1);
+}
