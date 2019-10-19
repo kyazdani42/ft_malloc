@@ -28,6 +28,9 @@ FLAGS = -Wall -Wextra -Werror -fPIC
 ifneq ($(DEBUG),)
 	FLAGS += -g3
 endif
+ifneq ($(OP),)
+	FLAGS += -o3
+endif
 
 .PHONY: all clean fclean re
 

@@ -12,83 +12,103 @@
 
 #include "ft_malloc.h"
 
-inline static void     defrag(t_alloc **e, t_alloc **p, t_alloc *prevprev) {
-    t_alloc     *next;
-    t_alloc     *prev;
-
-    prev = *p;
-    if (prev && prev->free && prev->zone == (*e)->zone)
-    {
-        prev->size += HEADER + (*e)->size;
-        prev->next = (*e)->next;
-        *e = prev;
-        *p = prevprev;
-    }
-    next = (*e)->next;
-    while (next && next->free && next->zone == (*e)->zone)
-    {
-        (*e)->size += HEADER + next->size;
-        next = next->next;
-        (*e)->next = next;
-    }
-}
-
-inline static int    loop_zone(void *ptr, t_alloc *zone, t_alloc **cur, t_alloc **prev, t_alloc **prevprev)
+inline static int		should_munmap(t_alloc *cur)
 {
-    *cur = zone;
-    *prev = NULL;
-    *prevprev = NULL;
-    while (*cur)
-    {
-        if ((void *)*cur + HEADER == ptr)
-            return (1);
-        *prevprev = *prev;
-        *prev = *cur;
-        *cur = (*cur)->next;
-    }
-    return (0);
+	t_alloc		*next;
+	t_alloc		*prev;
+
+	next = cur->next;
+	prev = cur->prev;
+	return ((!prev && !next) || (!prev && next && next->zone != cur->zone) ||
+				(!next && prev && prev->zone != cur->zone) ||
+		(next && prev && prev->zone != cur->zone && next->zone != cur->zone));
 }
 
-inline static t_alloc  **set_zone_and_elements(void *ptr, t_alloc **cur, t_alloc **prev, t_alloc **prevprev)
+inline static void		defrag(t_alloc **e)
 {
-    if (loop_zone(ptr, g_state.large, cur, prev, prevprev))
-        return &g_state.large;
-    if (loop_zone(ptr, g_state.small, cur, prev, prevprev))
-        return &g_state.small;
-    if (loop_zone(ptr, g_state.tiny, cur, prev, prevprev))
-        return &g_state.tiny;
-    return (NULL);
+	t_alloc		*next;
+	t_alloc		*prev;
+
+	prev = (*e)->prev;
+	next = (*e)->next;
+	while (prev && prev->free && prev->zone == (*e)->zone)
+	{
+		prev->size += HEADER + (*e)->size;
+		*e = prev;
+		(*e)->next = next;
+		if (next)
+			next->prev = *e;
+		prev = prev->prev;
+	}
+	while (next && next->free && next->zone == (*e)->zone)
+	{
+		(*e)->size += HEADER + next->size;
+		next = next->next;
+		if (next)
+			next->prev = *e;
+		(*e)->next = next;
+	}
 }
 
-void  free_unthread(void *ptr)
+inline static t_alloc	**set_zone_and_elements(void *ptr, t_alloc **cur)
 {
-    t_alloc     *cur;
-    t_alloc     *prev;
-    t_alloc     *tmp;
-    t_alloc     **zone;
-
-    if (!ptr || !(zone = set_zone_and_elements(ptr, &cur, &prev, &tmp)))
-        return;
-    cur->free = 1;
-    defrag(&cur, &prev, tmp);
-    tmp = cur->next;
-    if (((!prev && !tmp) || (!prev && tmp && tmp->zone != cur->zone) ||
-                (!tmp && prev && prev->zone != cur->zone) ||
-                (tmp && prev && prev->zone != cur->zone && tmp->zone != cur->zone)))
-    {
-        if (!prev)
-            *zone = cur->next;
-        else
-            prev->next = cur->next;
-        if (munmap(cur, cur->size + HEADER) == -1)
-            return;
-    }
+	*cur = g_state.large;
+	while (*cur)
+	{
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.large);
+		*cur = (*cur)->next;
+	}
+	*cur = g_state.small;
+	while (*cur)
+	{
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.small);
+		*cur = (*cur)->next;
+	}
+	*cur = g_state.tiny;
+	while (*cur)
+	{
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.tiny);
+		*cur = (*cur)->next;
+	}
+	return (NULL);
 }
 
-void free(void *ptr)
+void					free_unthread(void *ptr)
 {
-    pthread_mutex_lock(&g_mutex);
-    free_unthread(ptr);
-    pthread_mutex_unlock(&g_mutex);
+	t_alloc		*cur;
+	t_alloc		**zone;
+
+	if (!ptr)
+		return ;
+	if (!(zone = set_zone_and_elements(ptr, &cur)))
+		return ;
+	cur->free = 1;
+	defrag(&cur);
+	if (should_munmap(cur))
+	{
+		if (!cur->prev && !cur->next)
+			*zone = NULL;
+		else if (!cur->prev && cur->next)
+		{
+			*zone = cur->next;
+			(*zone)->prev = NULL;
+		}
+		else
+		{
+			*zone = cur->prev;
+			(*zone)->next = cur->next;
+		}
+		if (munmap(cur, cur->size + HEADER) == -1)
+			return ;
+	}
 }
 
+void					free(void *ptr)
+{
+	pthread_mutex_lock(&g_mutex);
+	free_unthread(ptr);
+	pthread_mutex_unlock(&g_mutex);
+}
