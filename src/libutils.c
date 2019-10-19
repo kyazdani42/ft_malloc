@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   reallocutils.c                                     :+:      :+:    :+:   */
+/*   libutils.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -11,15 +11,6 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
-
-int		check_new_size(t_alloc *cur, size_t size)
-{
-	if (cur->size <= TINY && size > TINY)
-		return (0);
-	if (cur->size <= SMALL && (size > SMALL || size <= TINY))
-		return (0);
-	return (1);
-}
 
 int		should_resize(t_alloc *cur, size_t size)
 {
@@ -35,6 +26,7 @@ int		should_resize(t_alloc *cur, size_t size)
 void	resize_alloc(t_alloc **cur, size_t size)
 {
 	t_alloc		*next;
+    t_alloc     *new;
 	size_t		next_size;
 
 	next = (*cur)->next;
@@ -42,46 +34,53 @@ void	resize_alloc(t_alloc **cur, size_t size)
 	if (next_size < (HEADER * 2 + 16))
 	{
 		(*cur)->size += HEADER + next->size;
-		(*cur)->next = next->next;
+        next = next->next;
+		(*cur)->next = next;
+        if (next)
+            next->prev = *cur;
 	}
 	else
 	{
+		new = (void *)*cur + HEADER + size;
+        next = next->next;
+        new->free = 1;
+        new->size = next_size;
+        new->zone = (*cur)->zone;
+        new->next = next;
+        new->prev = *cur;
+        if (next)
+            next->prev = new;
+		(*cur)->next = new;
 		(*cur)->size = size;
-		(*cur)->next = (void *)*cur + HEADER + size;
-		(*cur)->next->next = next->next;
-		next = (*cur)->next;
-		next->prev = *cur;
-		next->free = 1;
-		next->zone = (*cur)->zone;
-		next->size = next_size;
 	}
 }
 
-t_alloc	*get_header_from_addr(void *ptr)
+t_alloc	**get_zone_set_cur(void *ptr, t_alloc **cur)
 {
-	t_alloc	*tmp;
+	*cur = g_state.large;
+	while (*cur)
+	{
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.large);
+		*cur = (*cur)->next;
+	}
 
-	tmp = g_state.large;
-	while (tmp)
+	*cur = g_state.small;
+	while (*cur)
 	{
-		if ((void *)tmp + HEADER == ptr)
-			return (tmp);
-		tmp = tmp->next;
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.small);
+		*cur = (*cur)->next;
 	}
-	tmp = g_state.small;
-	while (tmp)
+
+	*cur = g_state.tiny;
+	while (*cur)
 	{
-		if ((void *)tmp + HEADER == ptr)
-			return (tmp);
-		tmp = tmp->next;
+		if ((void *)*cur + HEADER == ptr)
+			return (&g_state.tiny);
+		*cur = (*cur)->next;
 	}
-	tmp = g_state.tiny;
-	while (tmp)
-	{
-		if ((void *)tmp + HEADER == ptr)
-			return (tmp);
-		tmp = tmp->next;
-	}
+
 	return (NULL);
 }
 
