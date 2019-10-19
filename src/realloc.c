@@ -33,7 +33,7 @@ inline static void	*_realloc(void *ptr, size_t size)
     }
 
     if (!(new_ptr = _malloc(size)))
-        return (ptr);
+        return (NULL);
     copy_memory(new_ptr, ptr, header->size);
     _free(ptr);
 

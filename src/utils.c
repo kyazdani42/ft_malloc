@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-static int      get_addr_length(long long addr, int base)
+inline static int      get_addr_length(long long addr, int base)
 {
     int         i;
 

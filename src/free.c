@@ -12,14 +12,17 @@
 
 #include "ft_malloc.h"
 
-inline static void     defrag(t_alloc **e, t_alloc *prev) {
+inline static void     defrag(t_alloc **e, t_alloc **p, t_alloc *prevprev) {
     t_alloc     *next;
+    t_alloc     *prev;
 
+    prev = *p;
     if (prev && prev->free && prev->zone == (*e)->zone)
     {
         prev->size += HEADER + (*e)->size;
         prev->next = (*e)->next;
         *e = prev;
+        *p = prevprev;
     }
     next = (*e)->next;
     while (next && next->free && next->zone == (*e)->zone)
@@ -30,55 +33,29 @@ inline static void     defrag(t_alloc **e, t_alloc *prev) {
     }
 }
 
-inline static int   should_munmap(t_alloc *elem, t_alloc *prev)
-{
-    t_alloc     *next;
-
-    next = elem->next;
-    if (!prev && !next)
-        return (1);
-    if (!prev)
-        return next->zone != elem->zone ? 1 : 0;
-    if (!next)
-        return prev->zone != elem->zone ? 1 : 0;
-    return (elem->zone != prev->zone && elem->zone != next->zone ? 1 : 0);
-}
-
-t_alloc    *get_prev(t_alloc *zone, t_alloc *elem)
-{
-    t_alloc *tmp;
-
-    tmp = zone;
-    if (zone == elem)
-        return (NULL);
-    while (tmp && tmp->next && tmp->next != elem)
-        tmp = tmp->next;
-    return (tmp);
-}
-
-inline static int    loop_zone(void *ptr, t_alloc *zone, t_alloc **cur, t_alloc **prev)
+inline static int    loop_zone(void *ptr, t_alloc *zone, t_alloc **cur, t_alloc **prev, t_alloc **prevprev)
 {
     *cur = zone;
     *prev = NULL;
+    *prevprev = NULL;
     while (*cur)
     {
         if ((void *)*cur + HEADER == ptr)
             return (1);
+        *prevprev = *prev;
         *prev = *cur;
         *cur = (*cur)->next;
     }
-    *prev = NULL;
-    *cur = NULL;
     return (0);
 }
 
-inline static t_alloc  **set_zone_and_elements(void *ptr, t_alloc **cur, t_alloc **prev)
+inline static t_alloc  **set_zone_and_elements(void *ptr, t_alloc **cur, t_alloc **prev, t_alloc **prevprev)
 {
-    if (loop_zone(ptr, g_state.large, cur, prev))
+    if (loop_zone(ptr, g_state.large, cur, prev, prevprev))
         return &g_state.large;
-    if (loop_zone(ptr, g_state.small, cur, prev))
+    if (loop_zone(ptr, g_state.small, cur, prev, prevprev))
         return &g_state.small;
-    if (loop_zone(ptr, g_state.tiny, cur, prev))
+    if (loop_zone(ptr, g_state.tiny, cur, prev, prevprev))
         return &g_state.tiny;
     return (NULL);
 }
@@ -87,18 +64,17 @@ void  _free(void *ptr)
 {
     t_alloc     *cur;
     t_alloc     *prev;
+    t_alloc     *tmp;
     t_alloc     **zone;
 
-    if (!ptr)
+    if (!ptr || !(zone = set_zone_and_elements(ptr, &cur, &prev, &tmp)))
         return;
-
-    if (!(zone = set_zone_and_elements(ptr, &cur, &prev)))
-        return;
-
     cur->free = 1;
-    defrag(&cur, prev);
-    prev = get_prev(*zone, cur);
-    if (should_munmap(cur, prev))
+    defrag(&cur, &prev, tmp);
+    tmp = cur->next;
+    if (((!prev && !tmp) || (!prev && tmp && tmp->zone != cur->zone) ||
+                (!tmp && prev && prev->zone != cur->zone) ||
+                (tmp && prev && prev->zone != cur->zone && tmp->zone != cur->zone)))
     {
         if (!prev)
             *zone = cur->next;
