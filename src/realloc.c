@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-inline static void	*_realloc(void *ptr, size_t size)
+inline static void	*realloc_unthread(void *ptr, size_t size)
 {
     t_alloc     *header;
     t_alloc     *next;
@@ -32,10 +32,10 @@ inline static void	*_realloc(void *ptr, size_t size)
         return (ptr);
     }
 
-    if (!(new_ptr = _malloc(size)))
+    if (!(new_ptr = malloc_unthread(size)))
         return (NULL);
     copy_memory(new_ptr, ptr, header->size);
-    _free(ptr);
+    free_unthread(ptr);
 
     return (new_ptr);
 }
@@ -54,7 +54,7 @@ void                *realloc(void *ptr, size_t size)
     }
 
     pthread_mutex_lock(&g_mutex);
-    ret = _realloc(ptr, size);
+    ret = realloc_unthread(ptr, size);
     pthread_mutex_unlock(&g_mutex);
 
     return (ret);

@@ -10,7 +10,7 @@ void    *calloc(size_t count, size_t size)
     pthread_mutex_lock(&g_mutex);
 
     value = count * size;
-    if (!(ret = _malloc(value)))
+    if (!(ret = malloc_unthread(value)))
     {
         pthread_mutex_unlock(&g_mutex);
         return (NULL);

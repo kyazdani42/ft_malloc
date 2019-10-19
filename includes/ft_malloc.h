@@ -58,10 +58,10 @@ t_state             g_state;
 pthread_mutex_t     g_mutex;
 
 void                free(void *ptr);
-void                _free(void *ptr);
+void                free_unthread(void *ptr);
 
 void                *malloc(size_t size);
-void                *_malloc(size_t size);
+void                *malloc_unthread(size_t size);
 
 void                *calloc(size_t count, size_t size);
 

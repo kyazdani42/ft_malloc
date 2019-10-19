@@ -60,7 +60,7 @@ inline static t_alloc  **set_zone_and_elements(void *ptr, t_alloc **cur, t_alloc
     return (NULL);
 }
 
-void  _free(void *ptr)
+void  free_unthread(void *ptr)
 {
     t_alloc     *cur;
     t_alloc     *prev;
@@ -88,7 +88,7 @@ void  _free(void *ptr)
 void free(void *ptr)
 {
     pthread_mutex_lock(&g_mutex);
-    _free(ptr);
+    free_unthread(ptr);
     pthread_mutex_unlock(&g_mutex);
 }
 

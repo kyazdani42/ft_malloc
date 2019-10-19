@@ -84,7 +84,7 @@ static void                    *allocate(t_alloc **ptr, size_t size, size_t zone
     return (void *)alloc + HEADER;
 }
 
-void                    *_malloc(size_t size)
+void                    *malloc_unthread(size_t size)
 {
     size_t  aligned_size;
 
@@ -114,7 +114,7 @@ void                    *malloc(size_t size)
         initialization = 0;
     }
 
-    ret = _malloc(size);
+    ret = malloc_unthread(size);
     pthread_mutex_unlock(&g_mutex);
     return ret;
 }
