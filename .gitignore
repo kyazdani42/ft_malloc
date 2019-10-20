@@ -6,3 +6,7 @@ libft_malloc*
 *.swp
 tests/run_tests
 .clangd
+.ccls
+.ccls-cache
+main.c
+test
