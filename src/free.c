@@ -57,6 +57,11 @@ static void				remove_zone(t_alloc **zone, t_alloc *cur)
 
 	prev = cur->prev;
 	next = cur->next;
+    // if i dont have a previous element
+    // the pointer on the zone now points on the next
+    // and if the next is not null, set the prev of this pointer to null
+    // |X|  -> |X| -> ...  OR |X| -> NULL
+    // NULL <- |X| -> ...     NULL
 	if (!prev)
 	{
 		if ((*zone = next) != NULL)
@@ -64,6 +69,10 @@ static void				remove_zone(t_alloc **zone, t_alloc *cur)
 	}
 	else
 	{
+        // else the element before the freed zone now
+        // points to the next element of the freed zone
+        // and if there is such a next element
+        // its previous pointer to the previous of the freed zone
 		prev->next = next;
 		if (next)
 			next->prev = prev;
