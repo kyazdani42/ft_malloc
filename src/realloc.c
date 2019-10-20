@@ -5,19 +5,64 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/10/18 15:44:45 by kyazdani          #+#    #+#             */
-/*   Updated: 2019/10/18 15:44:47 by kyazdani         ###   ########.fr       */
+/*   Created: 2019/10/20 15:34:28 by kyazdani          #+#    #+#             */
+/*   Updated: 2019/10/20 15:34:32 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-inline static void	*reall_unthread(void *ptr, size_t size, int should_free)
+/* static int		should_resize(t_alloc *cur, size_t size) */
+/* { */
+/* 	t_alloc		*next; */
+/*  */
+/* 	next = cur->next; */
+/* 	return (next */
+/* 		&& next->free */
+/* 		&& next->zone == cur->zone */
+/* 		&& cur->size + HEADER + next->size >= size); */
+/* } */
+/*  */
+/* static void	resize_alloc(t_alloc *cur, size_t size) */
+/* { */
+/* 	t_alloc		*next; */
+/*     t_alloc     *new; */
+/* 	size_t		new_size; */
+/*  */
+/* 	next = cur->next; */
+/* 	new_size = next->size - (size - cur->size); */
+/* 	if (new_size < 16) */
+/* 	{ */
+/* 		cur->size += HEADER + next->size; */
+/* 		next = next->next; */
+/* 		cur->next = next; */
+/* 		if (next) */
+/* 			next->prev = cur; */
+/* 	} */
+/* 	else */
+/* 	{ */
+/* 		next = next->next; */
+/* 		cur->size = size; */
+/* 		new = (void *)cur + HEADER + size; */
+/* 		cur->next = new; */
+/* 		new->prev = cur; */
+/* 		new->next = next; */
+/* 		new->size = new_size; */
+/* 		new->zone = cur->zone; */
+/* 		new->free = 1; */
+/* 		if (next) */
+/* 			next->prev = new; */
+/* 	} */
+/* } */
+
+static void			*reall_unthread(void *ptr, size_t size, int should_free)
 {
     t_alloc     *cur;
     void        *new_ptr;
+	t_alloc		**zone;
 
-    if (get_zone_set_cur(ptr, &cur) == NULL)
+	cur = NULL;
+    if (!(zone = get_zone_set_cur(ptr, &cur)))
         return (NULL);
 
     size = get_multiple_of(size, 16);
@@ -25,11 +70,11 @@ inline static void	*reall_unthread(void *ptr, size_t size, int should_free)
     if (size <= cur->size)
         return (ptr);
 
-    if (should_resize(cur, size))
-    {
-        resize_alloc(&cur, size);
-        return (ptr);
-    }
+    /* if (should_resize(cur, size)) */
+    /* { */
+    /*     resize_alloc(cur, size); */
+    /*     return (ptr); */
+    /* } */
 
     if (!(new_ptr = malloc_unthread(size)))
     {
@@ -65,6 +110,7 @@ void				*reallocf(void *ptr, size_t size)
 
 void				*realloc(void *ptr, size_t size)
 {
+
     void	*ret;
 
     if (!ptr)
@@ -75,6 +121,7 @@ void				*realloc(void *ptr, size_t size)
         free(ptr);
         return (malloc(0));
     }
+
 
     pthread_mutex_lock(&g_mutex);
     ret = reall_unthread(ptr, size, 0);

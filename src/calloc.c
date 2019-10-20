@@ -15,24 +15,22 @@
 void	*calloc(size_t count, size_t size)
 {
 	size_t	value;
-	size_t	aligned_value;
 	char	*str;
 	void	*ret;
 
 	pthread_mutex_lock(&g_mutex);
-	value = count * size;
+	value = get_multiple_of(count * size, 16);
 	if (!(ret = malloc_unthread(value)))
 	{
 		pthread_mutex_unlock(&g_mutex);
 		return (NULL);
 	}
 	str = ret;
-	aligned_value = get_multiple_of(value, 16);
-	while (aligned_value)
+	while (value)
 	{
 		*str = 0;
 		str++;
-		aligned_value--;
+		value--;
 	}
 	pthread_mutex_unlock(&g_mutex);
 	return (ret);

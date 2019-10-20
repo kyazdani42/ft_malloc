@@ -66,8 +66,6 @@ void				*realloc(void *ptr, size_t size);
 void				*reallocf(void *ptr, size_t size);
 t_alloc				**get_zone_set_cur(void *ptr, t_alloc **cur);
 void				copy_memory(void *to, void *from, size_t n);
-int					should_resize(t_alloc *cur, size_t size);
-void				resize_alloc(t_alloc **header, size_t size);
 
 void				putstr(char *str);
 void				putnbr(size_t nb);

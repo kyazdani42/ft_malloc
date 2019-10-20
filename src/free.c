@@ -24,7 +24,7 @@ inline static int		should_munmap(t_alloc *cur)
 			(next && prev && prev->zone != cur->zone && next->zone != cur->zone));
 }
 
-inline static void		defrag(t_alloc **e)
+static void				defrag(t_alloc **e)
 {
 	t_alloc		*next;
 	t_alloc		*prev;
@@ -50,10 +50,11 @@ inline static void		defrag(t_alloc **e)
 	}
 }
 
-inline static void		remove_zone(t_alloc **zone, t_alloc *cur)
+static void				remove_zone(t_alloc **zone, t_alloc *cur)
 {
 	t_alloc *prev;
 	t_alloc *next;
+
 	prev = cur->prev;
 	next = cur->next;
 	if (!prev)
@@ -75,7 +76,9 @@ void					free_unthread(void *ptr)
 	t_alloc		*cur;
 	t_alloc		**zone;
 
-	if (!ptr || (zone = get_zone_set_cur(ptr, &cur)) == NULL)
+	if (!ptr)
+		return ;
+	if (!(zone = get_zone_set_cur(ptr, &cur)))
 		return ;
 	cur->free = 1;
 	defrag(&cur);

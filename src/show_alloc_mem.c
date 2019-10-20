@@ -14,10 +14,17 @@
 
 static void	print_t_alloc(t_alloc *ptr)
 {
+	t_alloc		*prev;
+
 	if (!ptr)
 		putstr("Empty zone\n");
 	while (ptr)
 	{
+		if (prev && prev->zone != ptr->zone)
+			putstr("\x1b[31m\t\t\t      |\n\t\t\t      |\n\t\t\t      v\x1b[0m\n");
+		putstr("\e[34m");
+		putaddr(ptr->prev);
+		putstr(" <---- ");
 		if (ptr->free)
 			putstr("\e[32m");
 		else
@@ -27,8 +34,10 @@ static void	print_t_alloc(t_alloc *ptr)
 		putaddr((void *)ptr + HEADER + ptr->size - 1);
 		putstr(" : ");
 		putnbr(ptr->size);
-		putstr(" octets\n");
-		putstr("\e[0m");
+		putstr(" octets\e[34m ----> ");
+		putaddr(ptr->next);
+		putstr("\e[0m\n");
+		prev = ptr;
 		ptr = ptr->next;
 	}
 }

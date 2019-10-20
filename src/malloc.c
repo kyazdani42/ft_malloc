@@ -12,7 +12,7 @@
 
 #include "ft_malloc.h"
 
-inline static void	*new_zone(int zone_index, size_t size, size_t zone_size)
+static void		*new_zone(t_alloc *cur, size_t size, size_t zone_size)
 {
 	size_t		mmap_size;
 	t_alloc		*new;
@@ -25,60 +25,59 @@ inline static void	*new_zone(int zone_index, size_t size, size_t zone_size)
 
 	ptr->size = size;
 	ptr->free = 0;
-	ptr->zone = zone_index;
-	ptr->next = NULL;
+	ptr->zone = cur == NULL ? 0 : cur->zone + 1;
+	ptr->prev = cur;
 
 	new = (void *)ptr + HEADER + size;
 	new->size = mmap_size - (HEADER * 2 + size);
-	new->zone = zone_index;
+	new->zone = cur == NULL ? 0 : cur->zone + 1;
 	new->free = 1;
 	new->next = NULL;
 	new->prev = ptr;
 
 	ptr->next = new;
+	if (cur)
+		cur->next = ptr;
 
 	return (ptr);
 }
 
-inline static void	create_free_block(t_alloc **cur, size_t size)
+static void		create_free_block(t_alloc *cur, size_t size)
 {
 	t_alloc     *new;
 
-	new = (void *)*cur + HEADER + size;
+	new = (void *)cur + HEADER + size;
 	new->free = 1;
-	new->size = (*cur)->size - (HEADER + size);
-	new->zone = (*cur)->zone;
-	new->next = (*cur)->next;
-	new->prev = *cur;
+	new->size = cur->size - (HEADER + size);
+	new->zone = cur->zone;
+	new->next = cur->next;
+	new->prev = cur;
 
-	(*cur)->next = new;
-	(*cur)->size = size;
+	cur->next = new;
+	cur->size = size;
 }
 
-inline static void	*allocate(t_alloc **ptr, size_t size, size_t zone_size)
+static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 {
 	t_alloc		*alloc;
 	t_alloc		*new;
 
-	if (!*ptr)
+	if (!*zone)
 	{
-		if (!(*ptr = new_zone(0, size, zone_size)))
+		if (!(*zone = new_zone(NULL, size, zone_size)))
 			return (NULL);
-		(*ptr)->prev = NULL;
-		return ((void *)*ptr + HEADER);
+		return ((void *)*zone + HEADER);
 	}
 
-	alloc = *ptr;
+	alloc = *zone;
 
 	while (alloc->next && (!alloc->free || alloc->size < size))
 		alloc = alloc->next;
 
 	if (!alloc->free || alloc->size < size)
 	{
-		if (!(new = new_zone(alloc->zone + 1, size, zone_size)))
+		if (!(new = new_zone(alloc, size, zone_size)))
 			return (NULL);
-		alloc->next = new;
-		new->prev = alloc;
 		return ((void *)new + HEADER);
 	}
 
@@ -86,12 +85,12 @@ inline static void	*allocate(t_alloc **ptr, size_t size, size_t zone_size)
 
 	if (alloc->size < size + HEADER + 16)
 		return ((void *)alloc + HEADER);
-	create_free_block(&alloc, size);
+	create_free_block(alloc, size);
 
 	return ((void *)alloc + HEADER);
 }
 
-void				*malloc_unthread(size_t size)
+void			*malloc_unthread(size_t size)
 {
 	size_t	aligned_size;
 
@@ -104,7 +103,7 @@ void				*malloc_unthread(size_t size)
 		return (allocate(&g_state.large, aligned_size, aligned_size + HEADER));
 }
 
-void				*malloc(size_t size)
+void			*malloc(size_t size)
 {
 	static int	initialization = 1;
 	void		*ret;
