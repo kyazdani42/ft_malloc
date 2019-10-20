@@ -122,7 +122,6 @@ void				*realloc(void *ptr, size_t size)
         return (malloc(0));
     }
 
-
     pthread_mutex_lock(&g_mutex);
     ret = reall_unthread(ptr, size, 0);
     pthread_mutex_unlock(&g_mutex);

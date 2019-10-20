@@ -16,6 +16,7 @@ static void	print_t_alloc(t_alloc *ptr)
 {
 	t_alloc		*prev;
 
+	prev = NULL;
 	if (!ptr)
 		putstr("Empty zone\n");
 	while (ptr)
@@ -31,7 +32,7 @@ static void	print_t_alloc(t_alloc *ptr)
 			putstr("\e[35m");
 		putaddr((void *)ptr + HEADER);
 		putstr(" - ");
-		putaddr((void *)ptr + HEADER + ptr->size - 1);
+		putaddr((void *)ptr + HEADER + ptr->size);
 		putstr(" : ");
 		putnbr(ptr->size);
 		putstr(" octets\e[34m ----> ");

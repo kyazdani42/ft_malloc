@@ -19,25 +19,29 @@ static void		*new_zone(t_alloc *cur, size_t size, size_t zone_size)
 	t_alloc		*ptr;
 
 	mmap_size = get_multiple_of(zone_size, PS);
-	ptr = (t_alloc *)mmap(0, mmap_size, PROT, FLAGS, -1, 0);
+	ptr = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
 	if (ptr == MAP_FAILED)
 		return (NULL);
-
 	ptr->size = size;
 	ptr->free = 0;
 	ptr->zone = cur == NULL ? 0 : cur->zone + 1;
 	ptr->prev = cur;
-
+	if (cur)
+		cur->next = ptr;
+	if (mmap_size < HEADER * 2 + zone_size + 16)
+	{
+			ptr->size = mmap_size - HEADER;
+			ptr->next = NULL;
+			return (ptr);
+	}
 	new = (void *)ptr + HEADER + size;
+	ptr->next = new;
+
 	new->size = mmap_size - (HEADER * 2 + size);
 	new->zone = cur == NULL ? 0 : cur->zone + 1;
 	new->free = 1;
 	new->next = NULL;
 	new->prev = ptr;
-
-	ptr->next = new;
-	if (cur)
-		cur->next = ptr;
 
 	return (ptr);
 }
@@ -105,8 +109,8 @@ void			*malloc_unthread(size_t size)
 
 void			*malloc(size_t size)
 {
-	static int	initialization = 1;
-	void		*ret;
+	static int		initialization = 1;
+	void			*ret;
 
 	if (initialization)
 		pthread_mutex_init(&g_mutex, NULL);
