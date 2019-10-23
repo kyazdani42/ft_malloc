@@ -77,7 +77,8 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
     while (block->next && (!block->free || block->size < size))
         block = block->next;
 
-    if (!block->free || block->size < size) {
+    if (!block->free || block->size < size)
+    {
         if (!(new = new_zone(block, size, zone_size)))
             return (NULL);
         return ((void *)new + HEADER);
@@ -87,14 +88,16 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 
     if (block->size < size + HEADER + 16)
         return ((void *)block + HEADER);
-    create_free_block(block, size);
 
+    create_free_block(block, size);
     return ((void *)block + HEADER);
 }
 
 void			*malloc_unthread(size_t size)
 {
     size_t	aligned_size;
+    t_alloc *block;
+    t_alloc *ret;
 
     aligned_size = get_multiple_of(size, 16);
     if (aligned_size <= TINY)
@@ -102,7 +105,15 @@ void			*malloc_unthread(size_t size)
     else if (aligned_size <= SMALL)
         return (allocate(&g_state.small, aligned_size, SMALL_ZONE));
     else
-        return (allocate(&g_state.large, aligned_size, aligned_size + HEADER));
+    {
+        block = g_state.large;
+        while (block && block->next)
+            block = block->next;
+        ret = new_zone(block, aligned_size, aligned_size + HEADER);
+        if (!block)
+            g_state.large = ret;
+        return ((void *)ret + HEADER);
+    }
 }
 
 void			*malloc(size_t size)
