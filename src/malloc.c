@@ -1,11 +1,12 @@
 /* ************************************************************************** */
-/*                                                                            */ /*                                                        :::      ::::::::   */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
 /*   malloc.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kyazdani <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/10/19 14:25:22 by kyazdani          #+#    #+#             */
-/*   Updated: 2019/10/19 14:25:23 by kyazdani         ###   ########.fr       */
+/*   Created: 2019/10/23 21:39:23 by kyazdani          #+#    #+#             */
+/*   Updated: 2019/10/23 21:39:25 by kyazdani         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +57,8 @@ static void		create_free_block(t_alloc *cur, size_t size)
     new->zone = cur->zone;
     new->next = cur->next;
     new->prev = cur;
-    cur->next = new;
-    cur->size = size;
+	cur->next = new;
+	cur->size = size;
 }
 
 static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)

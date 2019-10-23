@@ -31,13 +31,14 @@ static void				defrag(t_alloc **e)
 
 	prev = (*e)->prev;
 	next = (*e)->next;
+	// |v| this can SIG_SEGV
 	while (prev && prev->free && prev->zone == (*e)->zone)
 	{
 		prev->size += HEADER + (*e)->size;
-		prev->next = (*e)->next;
-		*e = prev;
+		prev->next = next;
 		if (next)
-			next->prev = *e;
+			next->prev = prev;
+		*e = prev;
 		prev = prev->prev;
 	}
 	while (next && next->free && next->zone == (*e)->zone)
@@ -57,18 +58,20 @@ static void				remove_zone(t_alloc **zone, t_alloc *cur)
 
 	prev = cur->prev;
 	next = cur->next;
-	if (!prev)
-	{
-		if ((*zone = next) != NULL)
-			(*zone)->prev = NULL;
-	}
-	else
+	// if i remove this function too
+	if (prev)
 	{
 		prev->next = next;
 		if (next)
 			next->prev = prev;
 	}
-	munmap(cur, cur->size + HEADER);
+	else
+	{
+		*zone = next;
+		if (*zone)
+			(*zone)->prev = NULL;
+	}
+	munmap((void *)cur, cur->size + HEADER);
 }
 
 void					free_unthread(void *ptr)
@@ -84,6 +87,7 @@ void					free_unthread(void *ptr)
 	defrag(&cur);
 	if (should_munmap(cur))
 		remove_zone(zone, cur);
+		// |^| this can SIG_SEGV
 }
 
 void					free(void *ptr)
