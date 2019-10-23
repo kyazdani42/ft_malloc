@@ -54,3 +54,15 @@ void	copy_memory(void *to, void *from, size_t n)
 		src++;
 	}
 }
+
+void	initialize_mutex()
+{
+	static int	initialization = 1;
+	if (initialization)
+	{
+		write(1, "X", 1);
+		pthread_mutex_init(&g_mutex, NULL);
+		initialization = 0;
+	}
+	pthread_mutex_lock(&g_mutex);
+}

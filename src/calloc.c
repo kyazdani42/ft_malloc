@@ -18,7 +18,7 @@ void	*calloc(size_t count, size_t size)
 	char	*str;
 	void	*ret;
 
-	pthread_mutex_lock(&g_mutex);
+	initialize_mutex();
 	value = get_multiple_of(count * size, 16);
 	if (!(ret = malloc_unthread(value)))
 	{
