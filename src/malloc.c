@@ -12,51 +12,48 @@
 
 #include "ft_malloc.h"
 
-static void		*new_zone(t_alloc *cur, size_t size, size_t zone_size)
+static void		*new_zone(t_alloc *prev_zone, size_t size, size_t zone_size)
 {
-    size_t		mmap_size;
-    t_alloc		*new;
-    t_alloc		*ptr;
+    t_alloc		*free_block;
+    t_alloc		*new_zone;
 
-    mmap_size = get_multiple_of(zone_size, PS);
-    ptr = mmap(0, mmap_size, PROT, FLAGS, -1, 0);
-    if (ptr == MAP_FAILED)
+    zone_size = get_multiple_of(zone_size, PS);
+    if ((new_zone = mmap(0, zone_size, PROT, FLAGS, -1, 0)) == MAP_FAILED)
         return (NULL);
-
-    ptr->size = size;
-    ptr->free = 0;
-    ptr->zone = cur == NULL ? 0 : cur->zone + 1;
-    ptr->prev = cur;
-    if (cur)
-        cur->next = ptr;
-    if (mmap_size < HEADER * 2 + size + 16)
+    new_zone->size = size;
+    new_zone->free = 0;
+    new_zone->zone = prev_zone == NULL ? 0 : prev_zone->zone + 1;
+    new_zone->prev = prev_zone;
+    if (prev_zone)
+        prev_zone->next = new_zone;
+    if (zone_size < HEADER + size + HEADER + 16)
     {
-        ptr->size = mmap_size - HEADER;
-        ptr->next = NULL;
-        return (ptr);
+        new_zone->size = zone_size - HEADER;
+        new_zone->next = NULL;
+        return (new_zone);
     }
-    new = (void *)ptr + HEADER + size;
-    ptr->next = new;
-
-    new->size = mmap_size - (HEADER * 2 + size);
-    new->zone = cur == NULL ? 0 : cur->zone + 1;
-    new->free = 1;
-    new->next = NULL;
-    new->prev = ptr;
-
-    return (ptr);
+    free_block = (void *)new_zone + HEADER + size;
+    new_zone->next = free_block;
+    free_block->size = zone_size - (HEADER * 2 + size);
+    free_block->zone = new_zone->zone;
+    free_block->free = 1;
+    free_block->next = NULL;
+    free_block->prev = new_zone;
+    return (new_zone);
 }
 
 static void		create_free_block(t_alloc *cur, size_t size)
 {
     t_alloc     *new;
 
+	if (cur->size < size + HEADER + 16)
+		return;
     new = (void *)cur + HEADER + size;
-    new->free = 1;
     new->size = cur->size - (HEADER + size);
+    new->free = 1;
     new->zone = cur->zone;
     new->next = cur->next;
-    new->prev = cur;
+	new->prev = cur;
 	cur->next = new;
 	cur->size = size;
 }
@@ -65,32 +62,30 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 {
     t_alloc *block;
     t_alloc *new;
+	t_alloc	*prev;
 
-    if (!*zone) {
+    if (!*zone)
+	{
         if (!(*zone = new_zone(NULL, size, zone_size)))
             return (NULL);
         return ((void *)*zone + HEADER);
     }
-
+	prev = NULL;
     block = *zone;
-
-    while (block->next && (!block->free || block->size < size))
+    while (block)
+	{
+		if (block->free && size <= block->size)
+		{
+    		block->free = 0;
+   			create_free_block(block, size);
+   			return ((void *)block + HEADER);
+		}
+		prev = block;
         block = block->next;
-
-    if (!block->free || block->size < size)
-    {
-        if (!(new = new_zone(block, size, zone_size)))
-            return (NULL);
-        return ((void *)new + HEADER);
-    }
-
-    block->free = 0;
-
-    if (block->size < size + HEADER + 16)
-        return ((void *)block + HEADER);
-
-    create_free_block(block, size);
-    return ((void *)block + HEADER);
+	}
+    if (!(new = new_zone(prev, size, zone_size)))
+        return (NULL);
+    return ((void *)new + HEADER);
 }
 
 void			*malloc_unthread(size_t size)
