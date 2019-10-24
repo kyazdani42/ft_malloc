@@ -31,8 +31,6 @@ inline static void	print(t_alloc *ptr, t_alloc *prev)
 	putstr(" octets\e[34m ----> ");
 	putaddr(ptr->next);
 	putstr("\e[0m\n");
-	prev = ptr;
-	ptr = ptr->next;
 }
 
 static void			print_t_alloc(t_alloc *ptr)
@@ -43,7 +41,11 @@ static void			print_t_alloc(t_alloc *ptr)
 	if (!ptr)
 		putstr("Empty zone\n");
 	while (ptr)
+	{
 		print(ptr, prev);
+		prev = ptr;
+		ptr = ptr->next;
+	}
 }
 
 void				show_alloc_mem(void)
