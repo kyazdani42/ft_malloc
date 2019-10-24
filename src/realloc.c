@@ -14,8 +14,8 @@
 
 static void			*reall_unthread(void *ptr, size_t size, int should_free)
 {
-	t_alloc     *block;
-	void        *new_ptr;
+	t_alloc		*block;
+	void		*new_ptr;
 	t_alloc		**zone;
 
 	block = NULL;
@@ -54,7 +54,6 @@ void				*reallocf(void *ptr, size_t size)
 
 void				*realloc(void *ptr, size_t size)
 {
-
 	void	*ret;
 
 	if (!ptr)

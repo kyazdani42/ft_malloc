@@ -20,8 +20,8 @@ inline static int		should_munmap(t_alloc *cur)
 	next = cur->next;
 	prev = cur->prev;
 	return ((!prev && !next) || (!prev && next && next->zone != cur->zone) ||
-			(!next && prev && prev->zone != cur->zone) ||
-			(next && prev && prev->zone != cur->zone && next->zone != cur->zone));
+		(!next && prev && prev->zone != cur->zone) ||
+		(next && prev && prev->zone != cur->zone && next->zone != cur->zone));
 }
 
 static void				remove_zone(t_alloc **zone, t_alloc *to_remove)
@@ -37,12 +37,12 @@ static void				remove_zone(t_alloc **zone, t_alloc *to_remove)
 		if (next != NULL)
 			next->prev = prev;
 	}
-    if (*zone == to_remove)
-    {
-        *zone = (*zone)->next;
-        if (*zone != NULL)
-            (*zone)->prev = NULL;
-    }
+	if (*zone == to_remove)
+	{
+		*zone = (*zone)->next;
+		if (*zone != NULL)
+			(*zone)->prev = NULL;
+	}
 	munmap((void *)to_remove, to_remove->size + HEADER);
 }
 
@@ -53,7 +53,10 @@ static void				defrag(t_alloc *zone)
 	tmp = zone;
 	while (tmp)
 	{
-		while (tmp->free && tmp->next && tmp->next->free && tmp->zone == tmp->next->zone)
+		while (tmp->free
+				&& tmp->next
+				&& tmp->next->free
+				&& tmp->zone == tmp->next->zone)
 		{
 			if (tmp->next->next)
 				tmp->next->next->prev = tmp;
