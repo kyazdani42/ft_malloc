@@ -28,7 +28,6 @@ t_alloc	**get_zone_set_cur(void *ptr, t_alloc **cur)
 			return (&g_state.small);
 		*cur = (*cur)->next;
 	}
-
 	*cur = g_state.tiny;
 	while (*cur)
 	{
@@ -36,7 +35,6 @@ t_alloc	**get_zone_set_cur(void *ptr, t_alloc **cur)
 			return (&g_state.tiny);
 		*cur = (*cur)->next;
 	}
-
 	return (NULL);
 }
 

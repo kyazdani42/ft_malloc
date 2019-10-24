@@ -64,9 +64,11 @@ void				*calloc(size_t count, size_t size);
 
 void				*realloc(void *ptr, size_t size);
 void				*reallocf(void *ptr, size_t size);
+
 t_alloc				**get_zone_set_cur(void *ptr, t_alloc **cur);
 void				copy_memory(void *to, void *from, size_t n);
 void				initialize_mutex();
+
 void				putstr(char *str);
 void				putnbr(size_t nb);
 void				putaddr(void *ptr);
