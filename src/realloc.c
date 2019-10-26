@@ -14,7 +14,12 @@
 
 inline static void	cut_block(t_alloc *block, size_t new_size)
 {
-	if (block->next->size + block->size < new_size + 16)
+    t_alloc *new_next;
+    t_alloc *nextnext;
+    size_t  new_next_size;
+
+    new_next_size = block->next->size - (new_size - block->size);
+	if (new_next_size < 16)
 	{
 		block->size += HEADER + block->next->size;
 		block->next = block->next->next;
@@ -23,9 +28,17 @@ inline static void	cut_block(t_alloc *block, size_t new_size)
 	}
 	else
 	{
+        nextnext = block->next->next;
+        new_next = (void *)block + HEADER + new_size;
+        new_next->free = 1;
+        new_next->size = new_next_size;
+        new_next->next = nextnext;
+        new_next->prev = block;
+        if (nextnext)
+            nextnext->prev = new_next;
 		block->size = new_size;
+        block->next = new_next;
 	}
-
 }
 
 static void			*reall_unthread(void *ptr, size_t size, int should_free)
@@ -41,7 +54,7 @@ static void			*reall_unthread(void *ptr, size_t size, int should_free)
 	if (size <= block->size)
 		return (ptr);
 	else if (block->next && block->next->free
-			&& size <= block->next->size + block->size)
+			&& size <= block->next->size + block->size + HEADER)
 	{
 		cut_block(block, size);
 		return (ptr);
