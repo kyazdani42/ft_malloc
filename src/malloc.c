@@ -52,6 +52,8 @@ static void		create_free_block(t_alloc *cur, size_t size)
 	new->free = 1;
 	new->zone = cur->zone;
 	new->next = cur->next;
+	if (cur->next)
+		cur->next->prev = new;
 	new->prev = cur;
 	cur->next = new;
 	cur->size = size;

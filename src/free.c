@@ -33,20 +33,20 @@ static void				remove_zone(t_alloc **zone, t_alloc *to_remove)
 	next = to_remove->next;
 	if (prev)
 	{
-		prev->next = next;
-		if (next != NULL)
+		prev->next = to_remove->next;
+		if (next)
 			next->prev = prev;
 	}
-	if (*zone == to_remove)
+	else
 	{
 		*zone = (*zone)->next;
-		if (*zone != NULL)
+		if (*zone)
 			(*zone)->prev = NULL;
 	}
 	munmap((void *)to_remove, to_remove->size + HEADER);
 }
 
-static void				defrag(t_alloc *zone)
+static void				defrag(t_alloc *zone, t_alloc **cur)
 {
 	t_alloc	*tmp;
 
@@ -58,6 +58,8 @@ static void				defrag(t_alloc *zone)
 				&& tmp->next->free
 				&& tmp->zone == tmp->next->zone)
 		{
+			if (*cur == tmp->next)
+				*cur = tmp;
 			if (tmp->next->next)
 				tmp->next->next->prev = tmp;
 			tmp->size += HEADER + tmp->next->size;
@@ -77,7 +79,7 @@ void					free_unthread(void *ptr)
 	if (!(zone = get_zone_set_cur(ptr, &cur)))
 		return ;
 	cur->free = 1;
-	defrag(*zone);
+	defrag(*zone, &cur);
 	if (should_munmap(cur))
 		remove_zone(zone, cur);
 }
