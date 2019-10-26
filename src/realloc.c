@@ -12,6 +12,22 @@
 
 #include "ft_malloc.h"
 
+inline static void	cut_block(t_alloc *block, size_t new_size)
+{
+	if (block->next->size + block->size < new_size + 16)
+	{
+		block->size += HEADER + block->next->size;
+		block->next = block->next->next;
+		if (block->next)
+			block->next->prev = block;
+	}
+	else
+	{
+		block->size = new_size;
+	}
+
+}
+
 static void			*reall_unthread(void *ptr, size_t size, int should_free)
 {
 	t_alloc		*block;
@@ -24,6 +40,12 @@ static void			*reall_unthread(void *ptr, size_t size, int should_free)
 	size = get_multiple_of(size, 16);
 	if (size <= block->size)
 		return (ptr);
+	else if (block->next && block->next->free
+			&& size <= block->next->size + block->size)
+	{
+		cut_block(block, size);
+		return (ptr);
+	}
 	if (!(new_ptr = malloc_unthread(size)))
 	{
 		if (should_free)
