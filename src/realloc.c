@@ -29,7 +29,7 @@ inline static void	cut_block(t_alloc *block, size_t new_size)
 	else
 	{
         nextnext = block->next->next;
-        new_next = (void *)block + HEADER + new_size;
+        new_next = (void *)((char *)block + HEADER + new_size);
         new_next->free = 1;
         new_next->size = new_next_size;
         new_next->next = nextnext;

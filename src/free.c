@@ -43,7 +43,7 @@ static void				remove_zone(t_alloc **zone, t_alloc *to_remove)
 		if (*zone)
 			(*zone)->prev = NULL;
 	}
-	munmap((void *)to_remove, to_remove->size + HEADER);
+	munmap((char *)to_remove, to_remove->size + HEADER);
 }
 
 static void				defrag(t_alloc **cur)

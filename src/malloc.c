@@ -31,7 +31,7 @@ static void		*new_zone(t_alloc *prev_zone, size_t size, size_t zone_size)
 		new_zone->next = NULL;
 		return (new_zone);
 	}
-	new_zone->next = (void *)new_zone + HEADER + size;
+	new_zone->next = (void *)((char *)new_zone + HEADER + size);
 	new_zone->next->size = zone_size - (HEADER * 2 + size);
 	new_zone->next->zone = new_zone->zone;
 	new_zone->next->free = 1;
@@ -47,7 +47,7 @@ static void		create_free_block(t_alloc *cur, size_t size)
 	cur->free = 0;
 	if (cur->size < size + HEADER + 16)
 		return ;
-	new = (void *)cur + HEADER + size;
+	new = (void *)((char *)cur + HEADER + size);
 	new->size = cur->size - (HEADER + size);
 	new->free = 1;
 	new->zone = cur->zone;
@@ -69,7 +69,7 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 	{
 		if (!(*zone = new_zone(NULL, size, zone_size)))
 			return (NULL);
-		return ((void *)*zone + HEADER);
+		return ((char *)*zone + HEADER);
 	}
 	prev = NULL;
 	block = *zone;
@@ -85,7 +85,7 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 	}
 	if (!(new = new_zone(prev, size, zone_size)))
 		return (NULL);
-	return ((void *)new + HEADER);
+	return ((char *)new + HEADER);
 }
 
 void			*malloc_unthread(size_t size)
@@ -112,7 +112,7 @@ void			*malloc_unthread(size_t size)
 			return (NULL);
 		if (!block)
 			g_state.large = ret;
-		return ((void *)ret + HEADER);
+		return ((char *)ret + HEADER);
 	}
 }
 

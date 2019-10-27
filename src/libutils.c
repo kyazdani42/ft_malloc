@@ -17,21 +17,21 @@ t_alloc	**get_zone_set_cur(void *ptr, t_alloc **cur)
 	*cur = g_state.large;
 	while (*cur)
 	{
-		if ((void *)*cur + HEADER == ptr)
+		if ((char *)*cur + HEADER == ptr)
 			return (&g_state.large);
 		*cur = (*cur)->next;
 	}
 	*cur = g_state.small;
 	while (*cur)
 	{
-		if ((void *)*cur + HEADER == ptr)
+		if ((char *)*cur + HEADER == ptr)
 			return (&g_state.small);
 		*cur = (*cur)->next;
 	}
 	*cur = g_state.tiny;
 	while (*cur)
 	{
-		if ((void *)*cur + HEADER == ptr)
+		if ((char *)*cur + HEADER == ptr)
 			return (&g_state.tiny);
 		*cur = (*cur)->next;
 	}
