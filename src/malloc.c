@@ -90,11 +90,15 @@ static void		*allocate(t_alloc **zone, size_t size, size_t zone_size)
 
 void			*malloc_unthread(size_t size)
 {
-	size_t	aligned_size;
-	t_alloc *block;
-	t_alloc *ret;
+	size_t			aligned_size;
+	t_alloc 		*block;
+	t_alloc 		*ret;
+	struct rlimit	limits;
 
+	getrlimit(RLIMIT_DATA, &limits);
 	aligned_size = get_multiple_of(size, 16);
+	if (aligned_size > limits.rlim_cur || size > limits.rlim_cur)
+		return (NULL);
 	if (aligned_size <= TINY)
 		return (allocate(&g_state.tiny, aligned_size, TINY_ZONE));
 	else if (aligned_size <= SMALL)
@@ -104,7 +108,8 @@ void			*malloc_unthread(size_t size)
 		block = g_state.large;
 		while (block && block->next)
 			block = block->next;
-		ret = new_zone(block, aligned_size, aligned_size + HEADER);
+		if (!(ret = new_zone(block, aligned_size, aligned_size + HEADER)))
+			return (NULL);
 		if (!block)
 			g_state.large = ret;
 		return ((void *)ret + HEADER);
