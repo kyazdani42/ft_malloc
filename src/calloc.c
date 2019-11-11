@@ -12,26 +12,26 @@
 
 #include "ft_malloc.h"
 
-void	*calloc(size_t count, size_t size)
+void        *calloc(size_t count, size_t size)
 {
-	size_t	value;
-	char	*str;
-	void	*ret;
+    size_t  value;
+    char    *str;
+    void    *ret;
 
-	initialize_mutex();
-	value = get_multiple_of(count * size, 16);
-	if (!(ret = malloc_unthread(value)))
-	{
-		pthread_mutex_unlock(&g_mutex);
-		return (NULL);
-	}
-	str = ret;
-	while (value)
-	{
-		*str = 0;
-		str++;
-		value--;
-	}
-	pthread_mutex_unlock(&g_mutex);
-	return (ret);
+    initialize_mutex();
+    value = get_multiple_of(count * size, 16);
+    if (!(ret = malloc_unthread(value)))
+    {
+        pthread_mutex_unlock(&g_mutex);
+        return (NULL);
+    }
+    str = ret;
+    while (value)
+    {
+        *str = 0;
+        str++;
+        value--;
+    }
+    pthread_mutex_unlock(&g_mutex);
+    return (ret);
 }

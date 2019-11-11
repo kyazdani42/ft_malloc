@@ -29,14 +29,14 @@
 #  define PS sysconf(_SC_PAGESIZE)
 # endif
 
-typedef struct		s_alloc
+typedef struct      s_alloc
 {
-	short			free;
-	short			zone;
-	size_t			size;
-	struct s_alloc	*prev;
-	struct s_alloc	*next;
-}					t_alloc;
+    short           free;
+    short           zone;
+    size_t          size;
+    struct s_alloc  *prev;
+    struct s_alloc  *next;
+}                   t_alloc;
 
 # define HEADER get_multiple_of(sizeof(t_alloc), 16)
 # define TINY 512
@@ -46,36 +46,36 @@ typedef struct		s_alloc
 
 typedef struct		s_state
 {
-	t_alloc			*tiny;
-	t_alloc			*small;
-	t_alloc			*large;
-}					t_state;
+    t_alloc         *tiny;
+    t_alloc         *small;
+    t_alloc         *large;
+}                   t_state;
 
-t_state				g_state;
-pthread_mutex_t		g_mutex;
+t_state             g_state;
+pthread_mutex_t     g_mutex;
 
-void				free(void *ptr);
-void				free_unthread(void *ptr);
+void                free(void *ptr);
+void                free_unthread(void *ptr);
 
-void				*malloc(size_t size);
-void				*malloc_unthread(size_t size);
-size_t				malloc_size(const void *ptr);
-size_t				malloc_good_size(size_t size);
+void                *malloc(size_t size);
+void                *malloc_unthread(size_t size);
+size_t              malloc_size(const void *ptr);
+size_t              malloc_good_size(size_t size);
 
-void				*calloc(size_t count, size_t size);
+void                *calloc(size_t count, size_t size);
 
-void				*realloc(void *ptr, size_t size);
-void				*reallocf(void *ptr, size_t size);
+void                *realloc(void *ptr, size_t size);
+void                *reallocf(void *ptr, size_t size);
 
-t_alloc				**get_zone_set_cur(void *ptr, t_alloc **cur);
-void				copy_memory(void *to, void *from, size_t n);
-void				initialize_mutex();
+t_alloc             **get_zone_set_cur(void *ptr, t_alloc **cur);
+void                copy_memory(void *to, void *from, size_t n);
+void                initialize_mutex();
 
-void				putstr(char *str);
-void				putnbr(size_t nb);
-void				putaddr(void *ptr);
-size_t				get_multiple_of(size_t len, size_t alignment);
+void                putstr(char *str);
+void                putnbr(size_t nb);
+void                putaddr(void *ptr);
+size_t              get_multiple_of(size_t len, size_t alignment);
 
-void				show_alloc_mem();
+void                show_alloc_mem();
 
 #endif

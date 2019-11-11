@@ -10,3 +10,4 @@ tests/run_tests
 .ccls-cache
 main.c
 test
+compile_commands.json
